@@ -15,7 +15,7 @@ This project is a software tool designed to assist in verifying programming assi
 1️⃣ **Clone the repository:**
 
 ```sh
-git clone https://github.com/username/lms-homework-checker.git
+git clone https://github.com/domnanob/Alice-Project.git
 ```
 
 2️⃣ **Navigate to the project directory:**

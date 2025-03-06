@@ -1,0 +1,51 @@
+﻿@page "/roles"
+@rendermode InteractiveServer
+@inject NavigationManager Navigation
+@inject BlazorApp2.Services.IRoleService RoleService
+
+<h3>Roles Table</h3>
+
+@if (roles == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var role in roles)
+            {
+                <tr>
+                    <td>@role.Id</td>
+                    <td>@role.Name</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" @onclick="() => NavigateToUsers(role.Id)">view users</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+}
+
+@code {
+    private List<Models.Role> roles;
+
+    protected override async Task OnInitializedAsync()
+    {
+        roles = await RoleService.GetRoles();
+
+    }
+
+    private void NavigateToUsers(int roleId)
+    {
+        Navigation.NavigateTo($"/roles/users/{roleId}");
+    }
+
+}

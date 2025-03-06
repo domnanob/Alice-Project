@@ -1,0 +1,57 @@
+﻿@page "/users/update/{userId:int}"
+@rendermode InteractiveServer
+@using BlazorApp2.Models
+@inject BlazorApp2.Services.IUserService UserService
+@inject NavigationManager Navigation
+
+<h3>Update User</h3>
+
+@if (user == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="mb-3">
+        <label for="firstName" class="form-label">First Name</label>
+        <input type="text" class="form-control" id="firstName" @bind="user.FirstName" />
+    </div>
+    <div class="mb-3">
+        <label for="lastName" class="form-label">Last Name</label>
+        <input type="text" class="form-control" id="lastName" @bind="user.LastName" />
+    </div>
+    <div class="mb-3">
+        <label for="email" class="form-label">Email Address</label>
+        <input type="email" class="form-control" id="email" @bind="user.Email" />
+    </div>
+    <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" class="form-control" id="password" @bind="user.Password" />
+    </div>
+    <button class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+    <button class="btn btn-primary" @onclick="UpdateUser">Save</button>
+}
+
+@code {
+    [Parameter]
+    public int userId { get; set; }
+
+    private Models.User user;
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = await UserService.GetUser(userId);
+    }
+
+    private async Task UpdateUser()
+    {
+        await UserService.UpdateUser(user);
+
+        Navigation.NavigateTo("/users");
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/users");
+    }
+}

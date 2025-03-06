@@ -21,7 +21,7 @@ git clone https://github.com/domnanob/Alice-Project.git
 2️⃣ **Navigate to the project directory:**
 
 ```sh
-cd lms-homework-checker
+cd Alice-Project
 ```
 
 3️⃣ **Install dependencies (if any):**

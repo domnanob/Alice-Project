@@ -44,6 +44,13 @@ dotnet run
 
 ---
 
+## 📌 Software Plans
+
+The structure and database plan is avaibvle on figma, check it if you interested:
+https://www.figma.com/board/KPiznHW78y3g7YjvfGqE2s/PROJECT-ALICE?node-id=2-90&t=f0xAufWFnHYc5fB1-0
+
+---
+
 ## 📦 NuGet Packages Used
 
 This project utilizes the following NuGet packages:

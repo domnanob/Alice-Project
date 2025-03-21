@@ -1,8 +1,8 @@
-﻿@page "/roles/users/{roleId:int}"
+﻿@page "/roles/users/{roleId}"
 @rendermode InteractiveServer
 @inject NavigationManager Navigation
-@inject BlazorApp2.Services.IRoleService RoleService
-@inject BlazorApp2.Services.IUserService UserService
+@inject BlazorApp2.Services.IModelService<Role> RoleService
+@inject BlazorApp2.Services.IModelService<User> UserService
 
 <h3>Roles Table</h3>
 
@@ -53,7 +53,7 @@ else
 
 @code {
     [Parameter]
-    public int roleId { get; set; }
+    public string roleId { get; set; }
 
     private List<Models.User> users;
     private List<Models.Role> roles;
@@ -61,22 +61,22 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        users = await UserService.GetUsers();
-        users = users.Where(x => x.RoleId == roleId).ToList();
-        roles = await RoleService.GetRoles();
+        users = await UserService.GetAll();
+        users = users.Where(x => x.RoleId == Guid.Parse(roleId)).ToList();
+        roles = await RoleService.GetAll();
 
     }
 
     private async void ChangeRole(ChangeEventArgs e)
     {
         string value = e.Value.ToString();
-        int roleId = int.Parse(value.Split(";")[0]);
-        int userId = int.Parse(value.Split(";")[1]);
+        Guid roleId = Guid.Parse(value.Split(";")[0]);
+        Guid userId = Guid.Parse(value.Split(";")[1]);
 
         Models.User u = users.Single(x => x.Id == userId);
         u.RoleId = roleId;
 
-        await UserService.UpdateUser(u);
+        await UserService.Update(u);
 
         Navigation.NavigateTo("/roles");
 

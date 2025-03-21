@@ -1,0 +1,53 @@
+﻿@page "/tests/update/{testId}"
+@rendermode InteractiveServer
+@using BlazorApp2.Models
+@inject BlazorApp2.Services.IModelService<Test> TestService
+@inject NavigationManager Navigation
+
+<h3>Update Test</h3>
+
+@if (test == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="mb-3">
+        <label for="name" class="form-label">Test Name</label>
+        <input type="text" class="form-control" id="name" @bind="test.Name" />
+    </div>
+    <div class="mb-3">
+        <label for="directory" class="form-label">Directory</label>
+        <input type="text" class="form-control" id="directory" disabled @bind="test.Directory" />
+    </div>
+    <div class="mb-3">
+        <label for="user" class="form-label">User</label>
+        <input type="text" class="form-control" id="user" disabled @bind="test.Id" />
+    </div>
+    <button class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+    <button class="btn btn-primary" @onclick="UpdateTest">Save</button>
+}
+
+@code {
+    [Parameter]
+    public String testId { get; set; }
+
+    private Models.Test test;
+
+    protected override async Task OnInitializedAsync()
+    {
+        test = await TestService.Get(Guid.Parse(testId));
+    }
+
+    private async Task UpdateTest()
+    {
+        await TestService.Update(test);
+
+        Navigation.NavigateTo("/");
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/");
+    }
+}

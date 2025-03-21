@@ -14,8 +14,11 @@ builder.Services.AddDbContext<AppDbContext>(c =>
     c.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IClubService, ClubService>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<IModelService<User>, UserService>();
+builder.Services.AddScoped<IModelService<Role>, RoleService>();
+builder.Services.AddScoped<IModelService<Test>, TestService>();
+builder.Services.AddScoped<IModelService<TestCase>, TestCasesService>();
+builder.Services.AddScoped<IModelService<StudentTest>, StudentTestService>();
 
 var app = builder.Build();
 

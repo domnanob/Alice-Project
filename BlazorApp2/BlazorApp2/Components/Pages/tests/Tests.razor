@@ -1,0 +1,72 @@
+﻿@page "/tests/{userId}"
+@rendermode InteractiveServer
+@inject NavigationManager Navigation
+@inject BlazorApp2.Services.IModelService<Test> TestService
+
+<h3>Tests Table</h3>
+
+@if (tests == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in tests)
+            {
+                <tr>
+                    <td>@item.Id</td>
+                    <td>@item.Name</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" @onclick="() => NavigateToTestCases(item.Id)">cases</button>
+                        <button class="btn btn-warning btn-sm" @onclick="() => NavigateToTest(item.Id)">view</button>
+                        <button class="btn btn-danger btn-sm" @onclick="() => DeleteTest(item.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <button class="btn btn-primary" @onclick="OpenAddTestModal">Add</button>
+
+}
+
+@code {
+    [Parameter]
+    public string userId { get; set; }
+
+    private List<Models.Test> tests;
+
+    protected override async Task OnInitializedAsync()
+    {
+        tests = await TestService.GetAll();
+        tests = tests.Where(x => x.UserId == Guid.Parse(userId)).ToList();
+
+    }
+    private async Task DeleteTest(Guid testId)
+    {
+        await TestService.Delete(testId);
+        tests = await TestService.GetAll();
+    }
+    private void OpenAddTestModal()
+    {
+        Navigation.NavigateTo($"/tests/{userId}/add");
+    }
+
+    private void NavigateToTest(Guid testId)
+    {
+        Navigation.NavigateTo($"/tests/update/{testId}");
+    }
+    private void NavigateToTestCases(Guid testId)
+    {
+        Navigation.NavigateTo($"/tests/{testId}/cases");
+    }
+
+}

@@ -1,7 +1,7 @@
 ﻿@page "/users"
 @rendermode InteractiveServer
 @inject NavigationManager Navigation
-@inject BlazorApp2.Services.IUserService UserService
+@inject BlazorApp2.Services.IModelService<User> UserService
 
 <h3>User Table</h3>
 
@@ -47,7 +47,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        users = await UserService.GetUsers();
+        users = await UserService.GetAll();
 
     }
 
@@ -56,16 +56,16 @@ else
         Navigation.NavigateTo("/users/add");
     }
 
-    private void NavigateToUpdate(int userId)
+    private void NavigateToUpdate(Guid userId)
     {
         Navigation.NavigateTo($"/users/update/{userId}");
     }
 
-    private async Task DeleteUser(int userId)
+    private async Task DeleteUser(Guid userId)
     {
 
-        await UserService.DeleteUser(userId);
+        await UserService.Delete(userId);
 
-        users = await UserService.GetUsers();
+        users = await UserService.GetAll();
     }
 }

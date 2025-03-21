@@ -1,0 +1,44 @@
+﻿@page "/tests/{testId}/cases/add"
+@rendermode InteractiveServer
+@inject BlazorApp2.Services.IModelService<TestCase> TestCaseService
+@inject NavigationManager Navigation
+
+<h3>Add New Test Case</h3>
+
+<div class="mb-3">
+    <label for="testName" class="form-label">Input</label>
+    <input type="text" class="form-control" id="input" @bind="input" />
+</div>
+<div class="mb-3">
+    <label for="testName" class="form-label">Expected Output</label>
+    <input type="text" class="form-control" id="input" @bind="output" />
+</div>
+
+<button class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+<button class="btn btn-primary" @onclick="InsertTest">Save</button>
+
+@code {
+    [Parameter]
+    public string testId { get; set; }
+
+    private string input;
+    private string output;
+
+    private async Task InsertTest()
+    {
+        var testcase = new TestCase
+        {
+            Input = input,
+            ExpectedOutput = output,
+            TestId = Guid.Parse(testId)
+        };
+        await TestCaseService.Add(testcase);
+        Navigation.NavigateTo($"/tests/{testId}/cases");
+        StateHasChanged();
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo($"/tests/{testId}/cases");
+    }
+}

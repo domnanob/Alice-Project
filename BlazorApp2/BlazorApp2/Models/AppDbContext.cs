@@ -10,5 +10,8 @@ namespace BlazorApp2.Models
         public DbSet<Club> Clubs { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
+        public DbSet<Test> Tests { get; set; }
+        public DbSet<TestCase> TestCases { get; set; }
+        public DbSet<StudentTest> StudentTests { get; set; }
     }
 }

@@ -1,7 +1,7 @@
 ﻿@page "/roles"
 @rendermode InteractiveServer
 @inject NavigationManager Navigation
-@inject BlazorApp2.Services.IRoleService RoleService
+@inject BlazorApp2.Services.IModelService<Role> RoleService
 
 <h3>Roles Table</h3>
 
@@ -16,6 +16,7 @@ else
             <tr>
                 <th>ID</th>
                 <th>Name</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -39,11 +40,11 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        roles = await RoleService.GetRoles();
+        roles = await RoleService.GetAll();
 
     }
 
-    private void NavigateToUsers(int roleId)
+    private void NavigateToUsers(Guid roleId)
     {
         Navigation.NavigateTo($"/roles/users/{roleId}");
     }

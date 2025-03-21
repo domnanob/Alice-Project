@@ -1,27 +1,40 @@
 ﻿@page "/users/add"
 @rendermode InteractiveServer
 @using BlazorApp2.Models
-@inject BlazorApp2.Services.IUserService UserService
+@inject BlazorApp2.Services.IModelService<User> UserService
+@inject BlazorApp2.Services.IModelService<Role> RoleService
 @inject NavigationManager Navigation
 
 <h3>Add New User</h3>
-
-<div class="mb-3">
-    <label for="userFirstName" class="form-label">First Name</label>
-    <input type="text" class="form-control" id="userName" @bind="newUserFirstName" />
-</div>
-<div class="mb-3">
-    <label for="userLastName" class="form-label">Last Name</label>
-    <input type="text" class="form-control" id="userLastName" @bind="newUserLastName" />
-</div>
-<div class="mb-3">
-    <label for="emailAddress" class="form-label">Email Address</label>
-    <input type="email" class="form-control" id="emailAddress" @bind="emailAddress" />
-</div>
-<div class="mb-3">
-    <label for="newPassword" class="form-label">Password</label>
-    <input type="password" class="form-control" id="newPassword" @bind="newPassword" />
-</div>
+@if (roles == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="mb-3">
+        <label for="userFirstName" class="form-label">First Name</label>
+        <input type="text" class="form-control" id="userName" @bind="newUserFirstName" />
+    </div>
+    <div class="mb-3">
+        <label for="userLastName" class="form-label">Last Name</label>
+        <input type="text" class="form-control" id="userLastName" @bind="newUserLastName" />
+    </div>
+    <div class="mb-3">
+        <label for="emailAddress" class="form-label">Email Address</label>
+        <input type="email" class="form-control" id="emailAddress" @bind="emailAddress" />
+    </div>
+    <div class="mb-3">
+        <label for="newPassword" class="form-label">Password</label>
+        <input type="password" class="form-control" id="newPassword" @bind="newPassword" />
+    </div>
+    <select class="form-control" name="roles" id="roles" @bind="newrole">
+        @foreach (var role in roles)
+        {
+            <option value="@role.Id">@role.Name</option>
+        }
+    </select>
+}
 
 <button class="btn btn-secondary" @onclick="Cancel">Cancel</button>
 <button class="btn btn-primary" @onclick="InsertUser">Save</button>
@@ -31,6 +44,15 @@
     private string newUserLastName;
     private string emailAddress;
     private string newPassword;
+    private string newrole;
+
+    private List<Models.Role> roles;
+
+    protected override async Task OnInitializedAsync()
+    {
+        roles = await RoleService.GetAll();
+
+    }
 
     private async Task InsertUser()
     {
@@ -41,11 +63,11 @@
                 LastName = newUserLastName,
                 Email = emailAddress,
                 Password = newPassword,
-                RoleId = 1
+                RoleId = Guid.Parse(newrole)
             };
 
         // Insert the club into the database
-        await UserService.AddUser(user);
+        await UserService.Add(user);
 
         // Close the modal and navigate back to the club page
         Navigation.NavigateTo("/users");

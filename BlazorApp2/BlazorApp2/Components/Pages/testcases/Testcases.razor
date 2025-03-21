@@ -1,0 +1,68 @@
+﻿@page "/tests/{testId}/cases"
+@rendermode InteractiveServer
+@inject NavigationManager Navigation
+@inject BlazorApp2.Services.IModelService<Test> TestService
+@inject BlazorApp2.Services.IModelService<TestCase> TestCaseService
+
+
+@if (testCases == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <h3>@test.Name Cases</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Expected Output</th>
+                <th>Input</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in testCases)
+            {
+                <tr>
+                    <td>@item.Id</td>
+                    <td>@item.ExpectedOutput</td>
+                    <td>@item.Input</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" @onclick="() => DeleteTest(item.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <button class="btn btn-primary" @onclick="OpenAddTestCasesModal">Add</button>
+
+}
+
+@code {
+    [Parameter]
+    public string testId { get; set; }
+
+    private List<TestCase> testCases;
+    private Test test;
+
+    protected override async Task OnInitializedAsync()
+    {
+        test = await TestService.Get(Guid.Parse(testId));
+        List<TestCase> testcases = await TestCaseService.GetAll();
+        testCases = testcases.Where(x => x.TestId == Guid.Parse(testId)).ToList();
+
+    }
+    private async Task DeleteTest(Guid testId)
+    {
+        await TestCaseService.Delete(testId);
+
+        List<TestCase> testcases = await TestCaseService.GetAll();
+        testCases = testcases.Where(x => x.TestId == Guid.Parse(this.testId)).ToList();
+    }
+    private void OpenAddTestCasesModal()
+    {
+        Navigation.NavigateTo($"/tests/{testId}/cases/add");
+    }
+
+}

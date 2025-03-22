@@ -4,6 +4,7 @@ using BlazorApp2.Models;
 using BlazorApp2.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using MudBlazor.Services;
 using Radzen;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +21,7 @@ builder.Services.AddCascadingAuthenticationState();
 
 builder.Services.AddBlazorBootstrap();
 builder.Services.AddRadzenComponents();
+builder.Services.AddMudServices();
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
@@ -49,8 +51,6 @@ else
 }
 
 app.UseHttpsRedirection();
-
-
 
 app.UseStaticFiles();
 

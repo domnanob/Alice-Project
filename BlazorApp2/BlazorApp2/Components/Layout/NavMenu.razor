@@ -38,21 +38,3 @@
         </AuthorizeView>
     </nav>
 </div>
-@code{
-    [CascadingParameter]
-    public HttpContext? HttpContext { get; set; }
-
-    private string testLink = "tests/";
-
-    protected override async Task OnInitializedAsync()
-    {
-        try
-        {
-            testLink += HttpContext.User.Claims.First(x => x.Type == "ID").Value;
-        }
-        catch
-        {
-            testLink = "tests/";
-        }
-    }
-}

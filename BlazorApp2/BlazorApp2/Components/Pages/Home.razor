@@ -2,6 +2,7 @@
 @inject NotificationService NotificationService
 @inject ToastService ToastService
 @inject ModalService ModalService
+@rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
 
@@ -12,7 +13,7 @@ Welcome to your new app.
 <Button Color="ButtonColor.Primary" @onclick="() => ShowModal(ModalType.Primary)">Show Primary Modal</Button>
 <RadzenRow Gap="1rem" RowGap="1rem" class="rz-m-0 rz-m-md-12">
     <RadzenColumn Size="12" SizeMD="3">
-        <RadzenCard Variant="Variant.Flat" class="rz-background-color-info-lighter">
+        <RadzenCard Variant="Radzen.Variant.Flat" class="rz-background-color-info-lighter">
             <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Info</RadzenText>
             <RadzenButton Text="Show info notification" Style="width: 100%;"
                 ButtonStyle="ButtonStyle.Info"
@@ -20,6 +21,21 @@ Welcome to your new app.
         </RadzenCard>
     </RadzenColumn>
 </RadzenRow>
+
+<MudExpansionPanels>
+    <MudExpansionPanel Text="Panel One" MaxHeight="150" Expanded="true">
+        Panel One Content
+    </MudExpansionPanel>
+    <MudExpansionPanel Text="Panel Two" MaxHeight="500">
+        Panel Two Content
+    </MudExpansionPanel>
+    <MudExpansionPanel Text="Panel Three" MaxHeight="1000">
+        Panel Three Content
+    </MudExpansionPanel>
+    <MudExpansionPanel Text="Panel Four">
+        Panel Four Content
+    </MudExpansionPanel>
+</MudExpansionPanels>
 
 
 @code {

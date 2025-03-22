@@ -1,8 +1,11 @@
 ﻿@page "/users/update/{userId}"
 @rendermode InteractiveServer
+@using BlazorApp2.Helpers
 @using BlazorApp2.Models
 @inject BlazorApp2.Services.IModelService<User> UserService
 @inject NavigationManager Navigation
+@inject ToastService ToastService
+@attribute [Authorize(Roles = "admin")]
 
 <h3>Update User</h3>
 
@@ -26,7 +29,11 @@ else
     </div>
     <div class="mb-3">
         <label for="password" class="form-label">Password</label>
-        <input type="password" class="form-control" id="password" @bind="user.Password" />
+        <input type="password" class="form-control" id="password" @bind="password" />
+    </div>
+    <div class="mb-3">
+        <label for="passwordagain" class="form-label">Password Again</label>
+        <input type="password" class="form-control" id="passwordagain" @bind="passwordAgain" />
     </div>
     <button class="btn btn-secondary" @onclick="Cancel">Cancel</button>
     <button class="btn btn-primary" @onclick="UpdateUser">Save</button>
@@ -37,6 +44,8 @@ else
     public String userId { get; set; }
 
     private Models.User user;
+    private String password;
+    private String passwordAgain;
 
     protected override async Task OnInitializedAsync()
     {
@@ -45,9 +54,23 @@ else
 
     private async Task UpdateUser()
     {
+        if (password != null && password != "")
+        {
+            if (password == passwordAgain)
+            {
+                user.Password = new PasswordHandling().Hash(password);
+            }
+            else
+            {
+                ToastService.Notify(new(ToastType.Danger, $"Passwords doesn't match!"));
+                return;
+            }
+        }
+
         await UserService.Update(user);
 
         Navigation.NavigateTo("/users");
+        ToastService.Notify(new(ToastType.Success, $"User updated successfully!"));
     }
 
     private void Cancel()

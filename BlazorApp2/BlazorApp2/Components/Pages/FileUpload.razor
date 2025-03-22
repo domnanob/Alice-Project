@@ -1,0 +1,80 @@
+﻿@page "/upload/{testId}"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components.Forms
+@inject IWebHostEnvironment env
+@attribute [Authorize()]
+
+<PageTitle>File Upload</PageTitle>
+
+<h3>File Upload</h3>
+<InputFile OnChange="HandleFileSelected" multiple />
+<button @onclick="ListUploadedFiles">List Uploaded Files</button>
+<ul>
+    @foreach (var file in uploadedFiles)
+    {
+        <li>@file</li>
+    }
+</ul>
+<h5>Data:</h5>
+<ul>
+    @foreach (var content in filecontents)
+    {
+        <li>@((MarkupString)content)</li>
+    }
+</ul>
+@code {
+    [Parameter]
+    public String testId { get; set; }
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    
+    private String userId { get; set; }
+    private List<string> uploadedFiles = new();
+    private List<string> filecontents = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authenticationstate = await authenticationStateTask;
+        userId = authenticationstate.User.Claims.First(x => x.Type == "ID").Value;
+
+    }
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        foreach (var file in e.GetMultipleFiles())
+        {
+            var filePath = Path.Combine(env.WebRootPath, "Upload");
+            filePath = Path.Combine(filePath, userId, testId);
+            if (!Directory.Exists(filePath))
+            {
+                Directory.CreateDirectory(filePath);
+            }
+            filePath = Path.Combine(filePath, file.Name);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.OpenReadStream().CopyToAsync(stream);
+            }
+            uploadedFiles.Add(file.Name);
+        }
+    }
+    private void ListUploadedFiles()
+    {
+        var uploadPath = Path.Combine(env.WebRootPath, "Upload", userId, testId);
+        if (Directory.Exists(uploadPath))
+        {
+            var files = Directory.GetFiles(uploadPath);
+            uploadedFiles = files.Select(file => Path.GetFileName(file)).ToList();
+            foreach (var file in uploadedFiles)
+            {
+                String filedata = "";
+                StreamReader sr = new StreamReader(uploadPath + "/" + file);
+                while (!sr.EndOfStream)
+                {
+                    filedata += sr.ReadLine() + "<br>";
+                }
+                filecontents.Add(filedata);
+            }
+        }
+    }
+}

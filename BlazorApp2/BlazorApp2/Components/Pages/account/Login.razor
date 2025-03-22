@@ -1,0 +1,88 @@
+﻿@page "/account/login"
+@using BlazorApp2.Helpers
+@using BlazorApp2.Models.ViewModels
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+
+@inject NavigationManager navigationManager
+@inject NotificationService NotificationService
+@inject ToastService ToastService
+@inject ModalService ModalService
+@inject BlazorApp2.Services.IModelService<User> UserService
+@inject BlazorApp2.Services.IModelService<Role> RoleService
+
+<div class="row">
+    <div class="col-lg-4 offset-lg-4 pt-4 pb-4 border">
+        <EditForm Model="@Model" OnValidSubmit="Authenticate" FormName="LoginForm">
+            <DataAnnotationsValidator />
+            <div class="mb-3 text center flex-column">
+                <h3>Login</h3>
+            </div>
+            <div class="mb-3">
+                <label>Email</label>
+                <InputText @bind-Value="Model.Email" class="form-control" placeholder="Email" />
+                <ValidationMessage For="() => Model.Email" />
+            </div>
+            <div class="mb-3">
+                <label>Password</label>
+                <InputText type="password" @bind-Value="Model.Password" class="form-control" placeholder="Password" />
+                <ValidationMessage For="() => Model.Password" />
+            </div>
+            <div class="mb-3 text-center">
+                <span class="text-danger">@errorMessage</span>
+            </div>
+            <div class="mb-3 d-grid gap-2">
+                <button type="submit" class="btn btn-primary">Login</button>
+            </div>
+        </EditForm>
+    </div>
+</div>
+@code {
+    [CascadingParameter]
+    public HttpContext? HttpContext { get; set; }
+
+    [SupplyParameterFromForm]
+    public LoginViewModel Model { get; set; } = new();
+
+    private List<User> users;
+    private List<Role> roles;
+    private string errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        users = await UserService.GetAll();
+        roles = await RoleService.GetAll();
+
+    }
+
+    void ShowNotification(NotificationMessage message)
+    {
+        NotificationService.Notify(message);
+    }
+
+    private async Task Authenticate()
+    {
+        User userAccount = users.Where(x => x.Email == Model.Email).FirstOrDefault();
+        if (userAccount is null || !(new PasswordHandling().Verify(Model.Password, userAccount.Password)))
+        {
+            errorMessage = "Invalid Email or Password";
+            ShowNotification(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Login Error", Detail = "Invalid Email or Password", Duration = 4000 });
+            ToastService.Notify(new(ToastType.Danger, $"Invalid Email or Password"));
+        }
+        else
+        {
+            var role = roles.Where(x => x.Id == userAccount.RoleId).FirstOrDefault();
+            var claims = new List<Claim>
+            {
+                new Claim("ID", userAccount.Id+""),
+                new Claim(ClaimTypes.Email, userAccount.Email),
+                new Claim(ClaimTypes.Role, role.Name)
+            };
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
+            await HttpContext.SignInAsync(principal);
+            navigationManager.NavigateTo("/");
+        }
+    }
+}

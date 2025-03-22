@@ -1,11 +1,26 @@
+using BlazorApp2;
 using BlazorApp2.Components;
 using BlazorApp2.Models;
 using BlazorApp2.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using Radzen;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
+{
+    options.Cookie.Name = "auth_token";
+    options.LoginPath = "/login";
+    options.Cookie.MaxAge = TimeSpan.FromMinutes(30);
+    options.AccessDeniedPath = "/access-denied";
+});
+builder.Services.AddAuthorization();
+builder.Services.AddCascadingAuthenticationState();
+
+builder.Services.AddBlazorBootstrap();
+builder.Services.AddRadzenComponents();
+
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
@@ -22,7 +37,6 @@ builder.Services.AddScoped<IModelService<StudentTest>, StudentTestService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseWebAssemblyDebugging();
@@ -36,7 +50,13 @@ else
 
 app.UseHttpsRedirection();
 
+
+
 app.UseStaticFiles();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.UseAntiforgery();
 
 app.MapRazorComponents<App>()

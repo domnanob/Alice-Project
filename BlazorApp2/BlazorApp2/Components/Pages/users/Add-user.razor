@@ -1,9 +1,12 @@
 ﻿@page "/users/add"
 @rendermode InteractiveServer
+@using BlazorApp2.Helpers
 @using BlazorApp2.Models
 @inject BlazorApp2.Services.IModelService<User> UserService
 @inject BlazorApp2.Services.IModelService<Role> RoleService
 @inject NavigationManager Navigation
+@inject ToastService ToastService
+@attribute [Authorize(Roles = "admin")]
 
 <h3>Add New User</h3>
 @if (roles == null)
@@ -28,10 +31,11 @@ else
         <label for="newPassword" class="form-label">Password</label>
         <input type="password" class="form-control" id="newPassword" @bind="newPassword" />
     </div>
-    <select class="form-control" name="roles" id="roles" @bind="newrole">
+    <select class="form-control" name="roles" id="roles" @onchange="(e => ChangeRole(e))">
+        <option value="choose" disabled>Choose!</option>
         @foreach (var role in roles)
         {
-            <option value="@role.Id">@role.Name</option>
+            <option value="@role.Id" >@role.Name</option>
         }
     </select>
 }
@@ -48,6 +52,14 @@ else
 
     private List<Models.Role> roles;
 
+    private async void ChangeRole(ChangeEventArgs e)
+    {
+        if (e.Value.ToString() != "choose")
+        {
+            newrole = e.Value.ToString();
+        }
+    }
+    
     protected override async Task OnInitializedAsync()
     {
         roles = await RoleService.GetAll();
@@ -62,7 +74,7 @@ else
                 FirstName = newUserFirstName,
                 LastName = newUserLastName,
                 Email = emailAddress,
-                Password = newPassword,
+                Password = new PasswordHandling().Hash(newPassword),
                 RoleId = Guid.Parse(newrole)
             };
 
@@ -72,6 +84,8 @@ else
         // Close the modal and navigate back to the club page
         Navigation.NavigateTo("/users");
         StateHasChanged();
+        ToastService.Notify(new(ToastType.Success, $"User created successfully!"));
+
     }
 
     private void Cancel()

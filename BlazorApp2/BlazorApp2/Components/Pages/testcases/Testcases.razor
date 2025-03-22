@@ -3,7 +3,7 @@
 @inject NavigationManager Navigation
 @inject BlazorApp2.Services.IModelService<Test> TestService
 @inject BlazorApp2.Services.IModelService<TestCase> TestCaseService
-
+@attribute [Authorize()]
 
 @if (testCases == null)
 {

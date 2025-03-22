@@ -1,8 +1,8 @@
-﻿@page "/tests/{userId}"
+﻿@page "/tests"
 @rendermode InteractiveServer
 @inject NavigationManager Navigation
 @inject BlazorApp2.Services.IModelService<Test> TestService
-
+@attribute [Authorize()]
 <h3>Tests Table</h3>
 
 @if (tests == null)
@@ -26,6 +26,7 @@ else
                     <td>@item.Id</td>
                     <td>@item.Name</td>
                     <td>
+                        <button class="btn btn-success btn-sm" @onclick="() => UploadTest(item.Id)">Upload</button>
                         <button class="btn btn-primary btn-sm" @onclick="() => NavigateToTestCases(item.Id)">cases</button>
                         <button class="btn btn-warning btn-sm" @onclick="() => NavigateToTest(item.Id)">view</button>
                         <button class="btn btn-danger btn-sm" @onclick="() => DeleteTest(item.Id)">Delete</button>
@@ -39,13 +40,17 @@ else
 }
 
 @code {
-    [Parameter]
     public string userId { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
 
     private List<Models.Test> tests;
 
     protected override async Task OnInitializedAsync()
     {
+        var authenticationstate = await authenticationStateTask;
+        userId = authenticationstate.User.Claims.First(x => x.Type == "ID").Value;
         tests = await TestService.GetAll();
         tests = tests.Where(x => x.UserId == Guid.Parse(userId)).ToList();
 
@@ -54,6 +59,10 @@ else
     {
         await TestService.Delete(testId);
         tests = await TestService.GetAll();
+    }
+    private async Task UploadTest(Guid testId)
+    {
+        Navigation.NavigateTo($"/upload/{testId}");
     }
     private void OpenAddTestModal()
     {

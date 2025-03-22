@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @inject NavigationManager Navigation
 @inject BlazorApp2.Services.IModelService<Role> RoleService
+@attribute [Authorize(Roles = "admin")]
 
 <h3>Roles Table</h3>
 

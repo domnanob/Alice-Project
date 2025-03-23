@@ -5,7 +5,6 @@
 @inject BlazorApp2.Services.IModelService<User> UserService
 @inject BlazorApp2.Services.IModelService<Role> RoleService
 @inject NavigationManager Navigation
-@inject ToastService ToastService
 @attribute [Authorize(Roles = "admin")]
 
 <h3>Add New User</h3>
@@ -32,7 +31,7 @@ else
         <input type="password" class="form-control" id="newPassword" @bind="newPassword" />
     </div>
     <select class="form-control" name="roles" id="roles" @onchange="(e => ChangeRole(e))">
-        <option value="choose" disabled>Choose!</option>
+        <option value="choose">Choose!</option>
         @foreach (var role in roles)
         {
             <option value="@role.Id" >@role.Name</option>
@@ -84,7 +83,6 @@ else
         // Close the modal and navigate back to the club page
         Navigation.NavigateTo("/users");
         StateHasChanged();
-        ToastService.Notify(new(ToastType.Success, $"User created successfully!"));
 
     }
 

@@ -2,7 +2,6 @@
 @rendermode InteractiveServer
 @inject NavigationManager Navigation
 @inject BlazorApp2.Services.IModelService<User> UserService
-@inject ToastService ToastService
 @attribute [Authorize(Roles="admin")]
 <h3>User Table</h3>
 
@@ -68,6 +67,5 @@ else
         await UserService.Delete(userId);
 
         users = await UserService.GetAll();
-        ToastService.Notify(new(ToastType.Success, $"User deleted successfully!"));
     }
 }

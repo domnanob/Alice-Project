@@ -6,9 +6,6 @@
 @using Microsoft.AspNetCore.Authentication.Cookies
 
 @inject NavigationManager navigationManager
-@inject NotificationService NotificationService
-@inject ToastService ToastService
-@inject ModalService ModalService
 @inject BlazorApp2.Services.IModelService<User> UserService
 @inject BlazorApp2.Services.IModelService<Role> RoleService
 
@@ -56,10 +53,6 @@
 
     }
 
-    void ShowNotification(NotificationMessage message)
-    {
-        NotificationService.Notify(message);
-    }
 
     private async Task Authenticate()
     {
@@ -67,8 +60,7 @@
         if (userAccount is null || !(new PasswordHandling().Verify(Model.Password, userAccount.Password)))
         {
             errorMessage = "Invalid Email or Password";
-            ShowNotification(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Login Error", Detail = "Invalid Email or Password", Duration = 4000 });
-            ToastService.Notify(new(ToastType.Danger, $"Invalid Email or Password"));
+
         }
         else
         {

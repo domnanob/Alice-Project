@@ -3,9 +3,6 @@
 @using BlazorApp2.Helpers
 
 @inject NavigationManager navigationManager
-@inject NotificationService NotificationService
-@inject ToastService ToastService
-@inject ModalService ModalService
 @inject BlazorApp2.Services.IModelService<User> UserService
 @inject BlazorApp2.Services.IModelService<Role> RoleService
 
@@ -71,10 +68,7 @@
         userRole = roles.Where(x => x.Name == "user").FirstOrDefault();
 
     }
-    void ShowNotification(NotificationMessage message)
-    {
-        NotificationService.Notify(message);
-    }
+
 
     private async Task Registration()
     {
@@ -96,13 +90,11 @@
             else
             {
                 errorMessage = "Passwords not match!";
-                ShowNotification(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Registration Error", Detail = "Passwords not match!", Duration = 4000 });
             }
         }
         else
         {
             errorMessage = "This email is already used!";
-            ShowNotification(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Registration Error", Detail = "This email is already used!", Duration = 4000 });
         }
     }
 

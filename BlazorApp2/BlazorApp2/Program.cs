@@ -4,24 +4,18 @@ using BlazorApp2.Models;
 using BlazorApp2.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
-using MudBlazor.Services;
-using Radzen;
 
 var builder = WebApplication.CreateBuilder(args);
-
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
 {
     options.Cookie.Name = "auth_token";
-    options.LoginPath = "/login";
+    options.LoginPath = "/account/login";
     options.Cookie.MaxAge = TimeSpan.FromMinutes(30);
-    options.AccessDeniedPath = "/access-denied";
+    options.AccessDeniedPath = "/account/access-denied";
 });
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 
-builder.Services.AddBlazorBootstrap();
-builder.Services.AddRadzenComponents();
-builder.Services.AddMudServices();
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
@@ -46,7 +40,6 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 

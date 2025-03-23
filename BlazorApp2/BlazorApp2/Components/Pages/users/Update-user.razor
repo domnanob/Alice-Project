@@ -4,7 +4,6 @@
 @using BlazorApp2.Models
 @inject BlazorApp2.Services.IModelService<User> UserService
 @inject NavigationManager Navigation
-@inject ToastService ToastService
 @attribute [Authorize(Roles = "admin")]
 
 <h3>Update User</h3>
@@ -62,7 +61,6 @@ else
             }
             else
             {
-                ToastService.Notify(new(ToastType.Danger, $"Passwords doesn't match!"));
                 return;
             }
         }
@@ -70,7 +68,6 @@ else
         await UserService.Update(user);
 
         Navigation.NavigateTo("/users");
-        ToastService.Notify(new(ToastType.Success, $"User updated successfully!"));
     }
 
     private void Cancel()

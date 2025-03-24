@@ -1,54 +1,61 @@
 ﻿@page "/users"
 @rendermode InteractiveServer
 @inject NavigationManager Navigation
+@inject BlazorApp2.Services.IBreadcrumbService BreadcrumbService
 @inject BlazorApp2.Services.IModelService<User> UserService
 @attribute [Authorize(Roles="admin")]
-<h3>User Table</h3>
-
+<h3>Users Table</h3>
 @if (users == null)
 {
-    <p><em>Loading...</em></p>
+    <MudPaper Class="d-flex mt-8 align-center text-center flex-grow-1 gap-4" Elevation="0">
+        <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+    </MudPaper>
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>Email</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var user in users)
-            {
-                <tr>
-                    <td>@user.Id</td>
-                    <td>@user.FirstName</td>
-                    <td>@user.LastName</td>
-                    <td>@user.Email</td>
-                    <td>
-                        <button class="btn btn-warning btn-sm" @onclick="() => NavigateToUpdate(user.Id)">Update</button>
-                        <button class="btn btn-danger btn-sm" @onclick="() => DeleteUser(user.Id)">Delete</button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-
+    <MudTable Items="@users">
+        <HeaderContent>
+            <MudTh>Id</MudTh>
+            <MudTh>FirstName</MudTh>
+            <MudTh>LastName</MudTh>
+            <MudTh>Email</MudTh>
+            <MudTh>Action</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Nr">@context.Id</MudTd>
+            <MudTd DataLabel="Sign">@context.FirstName</MudTd>
+            <MudTd DataLabel="Name">@context.LastName</MudTd>
+            <MudTd DataLabel="Position">@context.Email</MudTd>
+            <MudTd>
+                <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => NavigateToUpdate(context.Id))">Update</MudButton>
+                <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => DeleteUser(context.Id))">Delete</MudButton>
+            </MudTd>
+        </RowTemplate>
+        <PagerContent>
+                <MudTablePager PageSizeOptions="new int[] { 5, 10, 20, 100 }"
+                               RowsPerPageString="@rowsPerPageString"
+                               InfoFormat="@infoFormat"
+                               AllItemsText="@allItemsText"
+                               HorizontalAlignment="@horizontalAlignment" />
+            </PagerContent>
+    </MudTable>
+    <MudButton Class="mt-4" Variant="Variant.Outlined" Size="Size.Small" OnClick="@OpenAddUserModal">Add New User</MudButton>
 }
 
-<button class="btn btn-primary" @onclick="OpenAddUserModal">Add New User</button>
 
 @code {
-    private List<Models.User> users;
+    private HorizontalAlignment horizontalAlignment = HorizontalAlignment.Right;
+    private string rowsPerPageString = "Rows per page:";
+    private string infoFormat = "{first_item}-{last_item} of {all_items}";
+    private string allItemsText = "All";
 
+    private List<Models.User> users;
     protected override async Task OnInitializedAsync()
     {
         users = await UserService.GetAll();
-
+        await BreadcrumbService.Reset();
+        await BreadcrumbService.AddItem(new("Users", "/users"));
+        await BreadcrumbService.RefreshLayout();
     }
 
     private void OpenAddUserModal()

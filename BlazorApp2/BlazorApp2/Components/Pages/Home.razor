@@ -1,9 +1,21 @@
 ﻿@page "/"
 @rendermode InteractiveServer
+@inject ISnackbar Snackbar
+@inject BlazorApp2.Services.IBreadcrumbService BreadcrumbService
+
 <PageTitle>Home</PageTitle>
 
 <h1>Hello, world!</h1>
+
+<MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="@(() => Snackbar.Add("Simple Snackbar"))">
+    Open Snackbar
+</MudButton>
+
 @code {
 
-
+    protected override async Task OnInitializedAsync()
+    {
+        await BreadcrumbService.Reset();
+        await BreadcrumbService.RefreshLayout();
+    }
 }

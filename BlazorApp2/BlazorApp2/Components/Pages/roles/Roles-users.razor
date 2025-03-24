@@ -3,52 +3,47 @@
 @inject NavigationManager Navigation
 @inject BlazorApp2.Services.IModelService<Role> RoleService
 @inject BlazorApp2.Services.IModelService<User> UserService
+@inject BlazorApp2.Services.IBreadcrumbService BreadcrumbService
 @attribute [Authorize(Roles = "admin")]
 
 <h3>Roles Table</h3>
 
 @if (users == null || roles == null)
 {
-    <p><em>Loading...</em></p>
+    <MudProgressCircular Color="Color.Default" Indeterminate="true" />
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>FirstName</th>
-                <th>LastName</th>
-                <th>LastName</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var user in users)
-            {
-                <tr>
-                    <td>@user.Id</td>
-                    <td>@user.FirstName</td>
-                    <td>@user.LastName</td>
-                    <td>@user.Email</td>
-                    <td>
-                        <select class="form-control" name="roles" id="roles" @onchange="(e => ChangeRole(e))">
-                            @foreach (var role in roles)
-                            {
-                                @if (@user.RoleId == @role.Id)
-                                {
-                                    <option value="@role.Id;@user.Id" selected>@role.Name</option>
-                                }
-                                else
-                                {
-                                    <option value="@role.Id;@user.Id">@role.Name</option>
-                                }
-                            }
-                        </select>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <MudTable Items="@users">
+        <HeaderContent>
+            <MudTh>Id</MudTh>
+            <MudTh>FirstName</MudTh>
+            <MudTh>LastName</MudTh>
+            <MudTh>Email</MudTh>
+            <MudTh>Action</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Nr">@context.Id</MudTd>
+                <MudTd DataLabel="Sign">@context.FirstName</MudTd>
+                <MudTd DataLabel="Name">@context.LastName</MudTd>
+                <MudTd DataLabel="Position">@context.Email</MudTd>
+                <MudTd>
+                    <MudSelect T="Guid" Label="Roles" @onchange="()=>ChangeRole(context)" @bind-Value="context.RoleId">
+                        @foreach (var role in roles)
+                        {
+                        <MudSelectItem T="Guid" Value="@role.Id">@role.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager PageSizeOptions="new int[] { 5, 10, 20, 100 }"
+                               RowsPerPageString="@rowsPerPageString"
+                               InfoFormat="@infoFormat"
+                               AllItemsText="@allItemsText"
+                               HorizontalAlignment="@horizontalAlignment" />
+            </PagerContent>
+        </MudTable>
 
 }
 
@@ -60,27 +55,24 @@ else
     private List<Models.Role> roles;
     private int selectedItem { get; set; }
 
+    private HorizontalAlignment horizontalAlignment = HorizontalAlignment.Right;
+    private string rowsPerPageString = "Rows per page:";
+    private string infoFormat = "{first_item}-{last_item} of {all_items}";
+    private string allItemsText = "All";
+
     protected override async Task OnInitializedAsync()
     {
         users = await UserService.GetAll();
         users = users.Where(x => x.RoleId == Guid.Parse(roleId)).ToList();
         roles = await RoleService.GetAll();
+        BreadcrumbService.AddItem(new("Users", $"/roles/users/{roleId}"));
+        BreadcrumbService.RefreshLayout();
 
     }
-
-    private async void ChangeRole(ChangeEventArgs e)
+    private async void ChangeRole(User u)
     {
-        string value = e.Value.ToString();
-        Guid roleId = Guid.Parse(value.Split(";")[0]);
-        Guid userId = Guid.Parse(value.Split(";")[1]);
-
-        Models.User u = users.Single(x => x.Id == userId);
-        u.RoleId = roleId;
-
         await UserService.Update(u);
-
-        Navigation.NavigateTo("/roles");
-
+        Navigation.Refresh(true);
+        //Nem refreshel!
     }
-
 }

@@ -2,47 +2,52 @@
 @rendermode InteractiveServer
 @inject NavigationManager Navigation
 @inject BlazorApp2.Services.IModelService<Role> RoleService
+@inject BlazorApp2.Services.IBreadcrumbService BreadcrumbService
 @attribute [Authorize(Roles = "admin")]
 
 <h3>Roles Table</h3>
 
 @if (roles == null)
 {
-    <p><em>Loading...</em></p>
+    <MudProgressCircular Color="Color.Default" Indeterminate="true" />
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var role in roles)
-            {
-                <tr>
-                    <td>@role.Id</td>
-                    <td>@role.Name</td>
-                    <td>
-                        <button class="btn btn-warning btn-sm" @onclick="() => NavigateToUsers(role.Id)">view users</button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-
+    <MudTable Items="@roles">
+        <HeaderContent>
+            <MudTh>Id</MudTh>
+            <MudTh>Name</MudTh>
+            <MudTh>Action</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Id">@context.Id</MudTd>
+                <MudTd DataLabel="Name">@context.Name</MudTd>
+                <MudTd>
+                    <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => NavigateToUsers(context.Id))">View users</MudButton>
+                </MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager PageSizeOptions="new int[] { 5, 10, 20, 100 }"
+                               RowsPerPageString="@rowsPerPageString"
+                               InfoFormat="@infoFormat"
+                               AllItemsText="@allItemsText"
+                               HorizontalAlignment="@horizontalAlignment" />
+            </PagerContent>
+        </MudTable>
 }
 
 @code {
     private List<Models.Role> roles;
-
+    private HorizontalAlignment horizontalAlignment = HorizontalAlignment.Right;
+    private string rowsPerPageString = "Rows per page:";
+    private string infoFormat = "{first_item}-{last_item} of {all_items}";
+    private string allItemsText = "All";
     protected override async Task OnInitializedAsync()
     {
         roles = await RoleService.GetAll();
-
+        await BreadcrumbService.Reset();
+        await BreadcrumbService.AddItem(new("Roles", "/roles"));
+        await BreadcrumbService.RefreshLayout();
     }
 
     private void NavigateToUsers(Guid roleId)

@@ -2,40 +2,41 @@
 @rendermode InteractiveServer
 @inject NavigationManager Navigation
 @inject BlazorApp2.Services.IModelService<Test> TestService
+@inject BlazorApp2.Services.IBreadcrumbService BreadcrumbService
 @attribute [Authorize()]
 <h3>Tests Table</h3>
 
 @if (tests == null)
 {
-    <p><em>Loading...</em></p>
+    <MudProgressCircular Color="Color.Default" Indeterminate="true" />
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in tests)
-            {
-                <tr>
-                    <td>@item.Id</td>
-                    <td>@item.Name</td>
-                    <td>
-                        <button class="btn btn-success btn-sm" @onclick="() => UploadTest(item.Id)">Upload</button>
-                        <button class="btn btn-primary btn-sm" @onclick="() => NavigateToTestCases(item.Id)">cases</button>
-                        <button class="btn btn-warning btn-sm" @onclick="() => NavigateToTest(item.Id)">view</button>
-                        <button class="btn btn-danger btn-sm" @onclick="() => DeleteTest(item.Id)">Delete</button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-    <button class="btn btn-primary" @onclick="OpenAddTestModal">Add</button>
+    <MudTable Items="@tests">
+        <HeaderContent>
+            <MudTh>Id</MudTh>
+            <MudTh>Name</MudTh>
+            <MudTh>Action</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Nr">@context.Id</MudTd>
+                <MudTd DataLabel="Sign">@context.Name</MudTd>
+                <MudTd>
+                    <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => UploadTest(context.Id))">Upload</MudButton>
+                    <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => NavigateToTestCases(context.Id))">Cases</MudButton>
+                    <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => NavigateToTest(context.Id))">View</MudButton>
+                    <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => DeleteTest(context.Id))">Delete</MudButton>
+                </MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager PageSizeOptions="new int[] { 5, 10, 20, 100 }"
+                               RowsPerPageString="@rowsPerPageString"
+                               InfoFormat="@infoFormat"
+                               AllItemsText="@allItemsText"
+                               HorizontalAlignment="@horizontalAlignment" />
+            </PagerContent>
+        </MudTable>
+    <MudButton Class="mt-4" Variant="Variant.Outlined" Size="Size.Small" OnClick="@OpenAddTestModal">Add New Test</MudButton>
 
 }
 
@@ -46,14 +47,19 @@ else
     private Task<AuthenticationState> authenticationStateTask { get; set; }
 
     private List<Models.Test> tests;
-
+    private HorizontalAlignment horizontalAlignment = HorizontalAlignment.Right;
+    private string rowsPerPageString = "Rows per page:";
+    private string infoFormat = "{first_item}-{last_item} of {all_items}";
+    private string allItemsText = "All";
     protected override async Task OnInitializedAsync()
     {
         var authenticationstate = await authenticationStateTask;
         userId = authenticationstate.User.Claims.First(x => x.Type == "ID").Value;
         tests = await TestService.GetAll();
         tests = tests.Where(x => x.UserId == Guid.Parse(userId)).ToList();
-
+        await BreadcrumbService.Reset();
+        await BreadcrumbService.AddItem(new("Tests", "/tests"));
+        await BreadcrumbService.RefreshLayout();
     }
     private async Task DeleteTest(Guid testId)
     {

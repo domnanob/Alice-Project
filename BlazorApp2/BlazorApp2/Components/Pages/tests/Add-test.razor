@@ -29,12 +29,12 @@
                 UserId = Guid.Parse(userId)
         };
         await TestService.Add(test);
-        Navigation.NavigateTo($"/tests/{userId}");
+        Navigation.NavigateTo($"/tests");
         StateHasChanged();
     }
 
     private void Cancel()
     {
-        Navigation.NavigateTo($"/tests/{userId}");
+        Navigation.NavigateTo($"/tests");
     }
 }

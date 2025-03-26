@@ -5,7 +5,7 @@ namespace BlazorApp2.Services
 {
     public class BreadcrumbService : IBreadcrumbService
     {
-        private List<BreadcrumbItem> _items = [new("Home","/")];
+        private List<BreadcrumbItem> _items = new();
         public MainLayout MainLayoutInstance { get; set; }
         public async Task AddItem(BreadcrumbItem item)
         {
@@ -29,7 +29,15 @@ namespace BlazorApp2.Services
 
         public async Task Reset()
         {
-            _items = [new("Home", "/")];
+            _items = [new BreadcrumbItem(text: "Home", href: "/", icon: Icons.Material.Filled.Home)];
+        }
+
+        public async Task SetItems(List<BreadcrumbItem> items)
+        {
+            await Reset();
+            foreach (var item in items) {
+                _items.Add(item);
+            }
         }
 
         public async Task SetLayout(MainLayout layout)

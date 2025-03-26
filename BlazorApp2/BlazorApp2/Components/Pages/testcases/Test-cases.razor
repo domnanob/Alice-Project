@@ -1,0 +1,118 @@
+﻿@page "/tests/{testId}/cases"
+@inject IWebHostEnvironment env
+@inject IDialogService DialogService
+@inject BlazorApp2.Services.IModelService<TestCase> TestCaseService
+@inject BlazorApp2.Services.IModelService<Test> TestService
+@inject BlazorApp2.Services.IBreadcrumbService BreadcrumbService
+@inject BlazorApp2.Services.IFileHandlingService FileHandlingService
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+@attribute [Authorize()]
+
+@if (testCases == null)
+{
+    <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+}
+else
+{
+    <h3>@test.Name Cases</h3>
+    <MudTable Items="@testCases" Hover="true" Breakpoint="Breakpoint.Sm">
+        <ColGroup>
+            <col style="width: 60%;" />
+            <col />
+            <col />
+            <col />
+        </ColGroup>
+        <HeaderContent>
+            <MudTh>Name</MudTh>
+            <MudTh>Expected Output</MudTh>
+            <MudTh>Input</MudTh>
+            <MudTh>Action</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Name">@context.Name</MudTd>
+                <MudTd DataLabel="Out">
+                    <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="()=>OpenDialogAsync(context.Id+uploadOutputPath+context.ExpectedOutput)">@context.ExpectedOutput</MudButton>
+                </MudTd>
+                <MudTd DataLabel="In">
+                    <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="()=>OpenDialogAsync(context.Id+uploadInputPath+context.Input)">@context.Input</MudButton>
+                </MudTd>
+                <MudTd>
+                    <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => DeleteTest(context.Id))">Delete</MudButton>
+                </MudTd>
+            </RowTemplate>
+    </MudTable>
+    <div class="d-flex">
+        <MudButton Class="mt-4" Variant="Variant.Outlined" OnClick="@OpenAddTestCasesModal">Add New Test</MudButton>
+        <MudSpacer />
+        <MudButton Class="mt-4" Variant="Variant.Outlined" OnClick="@NavigateToRun">Run Tests</MudButton>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string testId { get; set; }
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    private HorizontalAlignment horizontalAlignment = HorizontalAlignment.Right;
+    private string rowsPerPageString = "Rows per page:";
+    private string infoFormat = "{first_item}-{last_item} of {all_items}";
+    private string allItemsText = "All";
+
+    private String userId { get; set; }
+    private List<TestCase> testCases;
+    private Test test;
+    private string uploadInputPath = "/Input/";
+    private string uploadOutputPath = "/Output/";
+
+    protected override async Task OnInitializedAsync()
+    {
+        test = await TestService.Get(Guid.Parse(testId));
+        List<TestCase> testcases = await TestCaseService.GetAll();
+        testCases = testcases.Where(x => x.TestId == Guid.Parse(testId)).ToList();
+        var authenticationstate = await authenticationStateTask;
+        userId = authenticationstate.User.Claims.First(x => x.Type == "ID").Value;
+        await BreadcrumbService.SetItems([
+            new(text: "Tests", href: "/tests", icon: Icons.Material.Filled.AllInbox),
+            new(test.Name, $"/test/{testId}/open", icon: Icons.Material.Filled.EditNote),
+            new("TestCases", $"/tests/{testId}/cases", icon: Icons.Material.Filled.Storage)]);
+        await BreadcrumbService.RefreshLayout();
+    }
+    private async Task DeleteTest(Guid testId)
+    {
+        string uploadPath = Path.Combine(env.WebRootPath, "Upload", userId, this.testId, "TestCases", testId.ToString());
+        await FileHandlingService.RemoveAllFiles(uploadPath);
+
+        await TestCaseService.Delete(testId);
+
+        List<TestCase> testcases = await TestCaseService.GetAll();
+        testCases = testcases.Where(x => x.TestId == Guid.Parse(this.testId)).ToList();
+    }
+    private void OpenAddTestCasesModal()
+    {
+        Navigation.NavigateTo($"/tests/{testId}/cases/add");
+    }
+    private void NavigateToRun()
+    {
+        Navigation.NavigateTo($"/test/{testId}/run");
+    }
+    private Task OpenDialogAsync(string filename)
+    {
+        string uploadPath = Path.Combine(env.WebRootPath, "Upload", userId, this.testId, "TestCases");
+        String filedata = "";
+        StreamReader sr = new StreamReader(uploadPath + "/" + filename);
+        while (!sr.EndOfStream)
+        {
+            filedata += sr.ReadLine() + "<br>";
+        }
+        sr.Close();
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+        var parameters = new DialogParameters<BlazorApp2.Components.Dialogs.Dialog>
+        {
+            { x => x.DialogTitle, filename},
+            { x => x.ContentText, filedata},
+        };
+        return DialogService.ShowAsync<BlazorApp2.Components.Dialogs.Dialog>("Code Dialog", parameters, options);
+    }
+}

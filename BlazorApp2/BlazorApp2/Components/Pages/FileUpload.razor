@@ -7,8 +7,32 @@
 <PageTitle>File Upload</PageTitle>
 
 <h3>File Upload</h3>
-<InputFile OnChange="HandleFileSelected" multiple />
-<button @onclick="ListUploadedFiles">List Uploaded Files</button>
+<MudFileUpload T="IReadOnlyList<IBrowserFile>" FilesChanged="UploadFiles">
+    <ActivatorContent>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Default"
+                   StartIcon="@Icons.Material.Filled.CloudUpload">
+            Choose Files
+        </MudButton>
+    </ActivatorContent>
+</MudFileUpload>
+@if (_files != null)
+{
+    <MudText Typo="@Typo.h6">@_files.Count() File@(_files.Count() == 1 ? "" : "s"):</MudText>
+    <MudList T="string">
+        @foreach (var file in _files)
+        {
+            <MudListItem Icon="@Icons.Material.Filled.AttachFile" @key="@file">
+                @file.Name <code>@file.Size bytes</code>
+            </MudListItem>
+        }
+    </MudList>
+}
+
+
+@*<InputFile OnChange="HandleFileSelected" multiple />*@
+<MudButton Class="mt-4" Variant="Variant.Outlined" Size="Size.Small" OnClick="@HandleFileSelected">Upload Files</MudButton>
+<MudButton Class="mt-4" Variant="Variant.Outlined" Size="Size.Small" OnClick="@ListUploadedFiles">List Uploaded Files</MudButton>
 <ul>
     @foreach (var file in uploadedFiles)
     {
@@ -27,7 +51,9 @@
     public String testId { get; set; }
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
-    
+
+    IList<IBrowserFile> _files = new List<IBrowserFile>();
+
     private String userId { get; set; }
     private List<string> uploadedFiles = new();
     private List<string> filecontents = new();
@@ -38,10 +64,17 @@
         userId = authenticationstate.User.Claims.First(x => x.Type == "ID").Value;
 
     }
-
-    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    private async void UploadFiles(IReadOnlyList<IBrowserFile> files)
     {
-        foreach (var file in e.GetMultipleFiles())
+        foreach (var file in files)
+        {
+            _files.Add(file);
+        }
+    }
+
+    private async Task HandleFileSelected()
+    {
+        foreach (var file in _files)
         {
             var filePath = Path.Combine(env.WebRootPath, "Upload");
             filePath = Path.Combine(filePath, userId, testId);

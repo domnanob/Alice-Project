@@ -5,7 +5,7 @@
 @inject BlazorApp2.Services.IBreadcrumbService BreadcrumbService
 @attribute [Authorize(Roles = "admin")]
 
-<h3>Roles Table</h3>
+<h3>Roles</h3>
 
 @if (roles == null)
 {
@@ -45,8 +45,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         roles = await RoleService.GetAll();
-        await BreadcrumbService.Reset();
-        await BreadcrumbService.AddItem(new("Roles", "/roles"));
+        await BreadcrumbService.SetItems([new(text: "Roles", href: "/roles", icon: Icons.Material.Filled.Storage)]);
         await BreadcrumbService.RefreshLayout();
     }
 

@@ -3,6 +3,7 @@
 @using BlazorApp2.Helpers
 @using BlazorApp2.Models
 @inject BlazorApp2.Services.IModelService<User> UserService
+@inject BlazorApp2.Services.IBreadcrumbService BreadcrumbService
 @inject NavigationManager Navigation
 @attribute [Authorize(Roles = "admin")]
 
@@ -49,6 +50,8 @@ else
     protected override async Task OnInitializedAsync()
     {
         user = await UserService.Get(Guid.Parse(userId));
+        await BreadcrumbService.SetItems([new(text: "Users", href: "/users", icon: Icons.Material.Filled.Storage), new(text: "Edit", href: $"/users/update/{userId}", icon: Icons.Material.Filled.Edit)]);
+        await BreadcrumbService.RefreshLayout();
     }
 
     private async Task UpdateUser()

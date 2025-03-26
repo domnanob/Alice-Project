@@ -1,0 +1,109 @@
+﻿@page "/test/{testId}/run"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components.Forms
+@inject IWebHostEnvironment env
+@inject IDialogService DialogService
+@inject NavigationManager Navigation
+@inject BlazorApp2.Services.IModelService<Test> TestService
+@inject BlazorApp2.Services.IModelService<TestCase> TestCaseService
+@inject BlazorApp2.Services.IModelService<StudentTest> StudentTestService
+@inject BlazorApp2.Services.IBreadcrumbService BreadcrumbService
+@inject BlazorApp2.Services.IFileHandlingService FileHandlingService
+@attribute [Authorize()]
+
+<PageTitle>Test View</PageTitle>
+<MudGrid Spacing="10">
+    <MudItem xs="12" lg="5">
+        <MudPaper Elevation="2" Class="d-flex overflow-x-auto overflow-y-auto align-start justify-start mud-width-full py-8" Height="500px">
+            <MudList T="string" Class="pa-2" Style="width:100%;">
+                <MudListSubheader>
+                    Submitted programs
+                </MudListSubheader>
+                @if (studentTests.Count != 0)
+                {
+                    @foreach (var stest in studentTests)
+                    {
+                        <MudListItem OnClick="()=>ChangeSelectedTest(stest)" Style="width:100%;" Icon="@Icons.Custom.FileFormats.FileCode">
+                            <MudText>@stest.StudentName<MudText Inline="true"></MudText></MudText>
+                        </MudListItem>
+                    }
+                }
+                else
+                {
+                    <MudListItem>No files uploaded!</MudListItem>
+                }
+            </MudList>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" lg="2">
+        <MudPaper Elevation="2" Class="d-flex flex-column align-center justify-center mud-width-full" Height="500px">
+            <MudItem xs="6" lg="6" Class="d-flex flex-column text-center justify-content-center">
+                <MudButton Class="mt-2" Variant="Variant.Outlined">Run Test</MudButton>
+                <MudButton Class="mt-2" Variant="Variant.Outlined">Run All Test</MudButton>
+            </MudItem>
+            <MudDivider />
+            <MudItem xs="6" lg="6" Class="text-center">
+                <MudText Class="mt-5" Typo="Typo.h5">Results</MudText>
+            </MudItem>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" lg="5">
+        <MudPaper Elevation="2" Class="d-flex overflow-x-auto overflow-y-auto align-start justify-start mud-width-full py-8 px-5" Height="500px">
+            <MudText Class="pa-2">
+                <pre>
+                    @((MarkupString)@selectedTestCode)
+                </pre>
+            </MudText>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+<MudExpansionPanels Elevation="2" MultiExpansion="true" Class="mt-5">
+    @foreach (var item in testCases)
+    {
+        <MudExpansionPanel Text="@("Test")">
+            @item.Name
+        </MudExpansionPanel>
+    }
+</MudExpansionPanels>
+
+
+@code {
+    [Parameter]
+    public String testId { get; set; }
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    IList<IBrowserFile> _files = new List<IBrowserFile>();
+
+    private String userId { get; set; }
+    private List<TestCase> testCases = new();
+    private List<StudentTest> studentTests = new();
+    private String uploadPath = "";
+    private String selectedTestCode = "No item selected!";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authenticationstate = await authenticationStateTask;
+        testCases = await TestCaseService.GetAll();
+        studentTests = await StudentTestService.GetAll();
+        userId = authenticationstate.User.Claims.First(x => x.Type == "ID").Value;
+
+        testCases = testCases.Where(x => x.TestId == Guid.Parse(testId)).ToList();
+        studentTests = studentTests.Where(x => x.TestId == Guid.Parse(testId)).ToList();
+        uploadPath = Path.Combine(env.WebRootPath, "Upload", userId, testId);
+        var currentTest = await TestService.Get(Guid.Parse(testId));
+
+        await BreadcrumbService.SetItems([new(text: "Tests", href: "/tests", icon: Icons.Material.Filled.AllInbox), new(currentTest.Name, $"/test/{testId}/open", icon: Icons.Material.Filled.EditNote), new("Run", $"/test/{testId}/run", icon: @Icons.Material.Filled.Checklist)]);
+        await BreadcrumbService.RefreshLayout();
+    }
+
+    private async void ChangeSelectedTest(StudentTest studentTest)
+    {
+        selectedTestCode = await FileHandlingService.ReadFileContent(uploadPath + "/" + studentTest.StudentName);
+    }
+
+    private void NavigateToCases()
+    {
+        Navigation.NavigateTo($"/tests/{testId}/cases");
+    }
+}

@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @using BlazorApp2.Models
 @inject BlazorApp2.Services.IModelService<Test> TestService
+@inject BlazorApp2.Services.IBreadcrumbService BreadcrumbService
 @inject NavigationManager Navigation
 @attribute [Authorize()]
 <h3>Update Test</h3>
@@ -12,20 +13,13 @@
 }
 else
 {
-    <div class="mb-3">
-        <label for="name" class="form-label">Test Name</label>
-        <input type="text" class="form-control" id="name" @bind="test.Name" />
-    </div>
-    <div class="mb-3">
-        <label for="directory" class="form-label">Directory</label>
-        <input type="text" class="form-control" id="directory" disabled @bind="test.Directory" />
-    </div>
-    <div class="mb-3">
-        <label for="user" class="form-label">User</label>
-        <input type="text" class="form-control" id="user" disabled @bind="test.Id" />
-    </div>
-    <button class="btn btn-secondary" @onclick="Cancel">Cancel</button>
-    <button class="btn btn-primary" @onclick="UpdateTest">Save</button>
+    <MudPaper Elevation="2" Class="px-16 py-8 ma-2">
+        <MudTextField @bind-Value="test.Name" Label="Test Name" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
+        <MudTextField @bind-Value="test.Directory" Label="Directory" Variant="Variant.Outlined" Margin="Margin.Dense" Disabled="true"></MudTextField>
+        
+        <MudButton Class="mt-4" Variant="Variant.Outlined" Size="Size.Small" OnClick="@Cancel">Cancel</MudButton>
+        <MudButton Class="mt-4" Variant="Variant.Outlined" Size="Size.Small" OnClick="@UpdateTest">Save</MudButton>
+    </MudPaper>
 }
 
 @code {
@@ -37,17 +31,19 @@ else
     protected override async Task OnInitializedAsync()
     {
         test = await TestService.Get(Guid.Parse(testId));
+        await BreadcrumbService.SetItems([new(text: "Tests", href: "/tests", icon: Icons.Material.Filled.AllInbox), new(text: "Edit", href: $"/tests/update/{testId}", icon: Icons.Material.Filled.Edit)]);
+        await BreadcrumbService.RefreshLayout();
     }
 
     private async Task UpdateTest()
     {
         await TestService.Update(test);
 
-        Navigation.NavigateTo("/");
+        Navigation.NavigateTo("/tests");
     }
 
     private void Cancel()
     {
-        Navigation.NavigateTo("/");
+        Navigation.NavigateTo("/tests");
     }
 }

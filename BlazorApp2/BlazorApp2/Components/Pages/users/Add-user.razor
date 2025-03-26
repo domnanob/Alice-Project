@@ -4,6 +4,7 @@
 @using BlazorApp2.Models
 @inject BlazorApp2.Services.IModelService<User> UserService
 @inject BlazorApp2.Services.IModelService<Role> RoleService
+@inject BlazorApp2.Services.IBreadcrumbService BreadcrumbService
 @inject NavigationManager Navigation
 @attribute [Authorize(Roles = "admin")]
 
@@ -62,7 +63,8 @@ else
     protected override async Task OnInitializedAsync()
     {
         roles = await RoleService.GetAll();
-
+        await BreadcrumbService.SetItems([new(text: "Users", href: "/users", icon: Icons.Material.Filled.Storage), new(text: "Add", href: "/users/add", icon: Icons.Material.Filled.Add)]);
+        await BreadcrumbService.RefreshLayout();
     }
 
     private async Task InsertUser()

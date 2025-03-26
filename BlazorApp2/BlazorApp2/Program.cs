@@ -46,6 +46,7 @@ builder.Services.AddScoped<IModelService<Role>, RoleService>();
 builder.Services.AddScoped<IModelService<Test>, TestService>();
 builder.Services.AddScoped<IModelService<TestCase>, TestCasesService>();
 builder.Services.AddScoped<IModelService<StudentTest>, StudentTestService>();
+builder.Services.AddScoped<IFileHandlingService, FileHandlingService>();
 builder.Services.AddSingleton<IBreadcrumbService, BreadcrumbService>();
 
 var app = builder.Build();

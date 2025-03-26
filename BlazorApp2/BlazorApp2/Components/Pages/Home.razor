@@ -2,19 +2,99 @@
 @rendermode InteractiveServer
 @inject ISnackbar Snackbar
 @inject BlazorApp2.Services.IBreadcrumbService BreadcrumbService
+@inject BlazorApp2.Services.IModelService<User> UserService
 
 <PageTitle>Home</PageTitle>
+@if (user == null)
+{
+    <MudPaper Class="d-flex mt-8 align-center text-center flex-grow-1 gap-4" Elevation="0">
+        <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+    </MudPaper>
+} else if (user.LastName == "none")
+{
+    <MudIcon Icon="@Icons.Material.Filled.Home" Style="font-size: 4rem;" />
+    <h2>Welcome at Alice!</h2>
+    <MudGrid>
+        <MudItem xs="12" md="6">
+            <MudPaper Elevation="0" Class="d-flex align-start justify-start mud-width-full py-8">
+                <MudList T="string">
+                    <h5>Start Your Journey</h5>
+                    <MudDivider />
+                    <MudListItem Text="Login" Href="/public/login" Icon="@Icons.Material.Filled.Login" />
+                    <MudListItem Text="Register" Href="/public/register" Icon="@Icons.Material.Filled.HowToReg" />
+                    <MudListItem Text="How to use" Href="#" Icon="@Icons.Material.Filled.HelpCenter" />
+                    <MudListItem Text="Help" Href="#" SecondaryText="Feel free to contact us" Icon="@Icons.Material.Filled.QuestionAnswer" />
+                </MudList>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudPaper Elevation="0" Class="d-flex align-start justify-start mud-width-full py-8">
+                <MudList T="string">
+                <h5>About Alice</h5>
+                    <MudDivider />
+                    <MudListItem Text="Whats new?" Href="#" Icon="@Icons.Material.Filled.Star" />
+                    <MudListItem Text="About us" Href="#" Icon="@Icons.Material.Filled.People" />
+                    <MudListItem Text="FAQ" Href="#" Icon="@Icons.Material.Filled.QuestionMark" />
+                    <MudListItem Text="Policies" Href="#" Icon="@Icons.Material.Filled.Rule" />
+                </MudList>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+} else
+{
+    <MudIcon Icon="@Icons.Material.Filled.Home" Style="font-size: 4rem;" />
+    <h2>Welcome @user.LastName!</h2>
+    <MudGrid>
+        <MudItem xs="6">
+            <MudPaper Elevation="0" Class="d-flex align-start justify-start mud-width-full py-8">
+                <MudList T="string">
+                    <h5>Start working</h5>
+                    <MudDivider />
+                    <MudListItem Text="Tests" Href="/tests" Icon="@Icons.Material.Filled.AllInbox" />
+                    <MudListItem Text="Create Test" Href="@("/tests/"+user.Id+"/add")" Icon="@Icons.Material.Filled.Add" />
+                    <MudListItem Text="Open Previous" Href="#" Icon="@Icons.Material.Filled.HelpCenter" />
+                    <MudListItem Text="Profile" Href="#" SecondaryText="Feel free to contact us" Icon="@Icons.Material.Filled.QuestionAnswer" />
+                </MudList>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="6">
+            <MudPaper Elevation="0" Class="d-flex align-start justify-start mud-width-full py-8">
+                <MudList T="string">
+                    <h5>About Alice</h5>
+                    <MudDivider />
+                    <MudListItem Text="Whats new?" Href="#" Icon="@Icons.Material.Filled.Star" />
+                    <MudListItem Text="About us" Href="#" Icon="@Icons.Material.Filled.People" />
+                    <MudListItem Text="FAQ" Href="#" Icon="@Icons.Material.Filled.QuestionMark" />
+                    <MudListItem Text="Policies" Href="#" Icon="@Icons.Material.Filled.Rule" />
+                </MudList>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+}
 
-<h1>Hello, world!</h1>
 
-<MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="@(() => Snackbar.Add("Simple Snackbar"))">
-    Open Snackbar
-</MudButton>
 
 @code {
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    public User user { get; set; }
+    public string? userId { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
+        try
+        {
+            var authenticationstate = await authenticationStateTask;
+            userId = authenticationstate.User.Claims.First(x => x.Type == "ID").Value;
+            user = await UserService.Get(Guid.Parse(userId));
+        }
+        catch (Exception)
+        {
+            user = new User()
+            {
+               LastName = "none"            };
+        }
         await BreadcrumbService.Reset();
         await BreadcrumbService.RefreshLayout();
     }

@@ -7,6 +7,7 @@ namespace BlazorApp2.Models
     public class TestCase
     {
         public Guid Id { get; set; }
+        public string Name { get; set; }
         public string Input { get; set; }
         public string ExpectedOutput { get; set; }
         public Guid TestId { get; set; }

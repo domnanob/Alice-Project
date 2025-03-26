@@ -1,4 +1,4 @@
-﻿@page "/account/register"
+﻿@page "/public/register"
 @using BlazorApp2.Models.ViewModels
 @using BlazorApp2.Helpers
 
@@ -85,7 +85,7 @@
                         Password = new PasswordHandling().Hash(Model.Password),
                         RoleId = userRole.Id,
                     });
-                navigationManager.NavigateTo("/account/login");
+                navigationManager.NavigateTo("/public/login");
             }
             else
             {

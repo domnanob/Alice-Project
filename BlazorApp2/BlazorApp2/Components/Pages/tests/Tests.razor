@@ -1,10 +1,12 @@
 ﻿@page "/tests"
 @rendermode InteractiveServer
 @inject NavigationManager Navigation
+@inject IWebHostEnvironment env
 @inject BlazorApp2.Services.IModelService<Test> TestService
 @inject BlazorApp2.Services.IBreadcrumbService BreadcrumbService
+@inject BlazorApp2.Services.IFileHandlingService FileHandlingService
 @attribute [Authorize()]
-<h3>Tests Table</h3>
+<h3>Tests</h3>
 
 @if (tests == null)
 {
@@ -13,27 +15,29 @@
 else
 {
     <MudTable Items="@tests">
+        <ColGroup>
+            <col style="width: 50%;" />
+            <col style="width: 50%;" />
+        </ColGroup>
         <HeaderContent>
-            <MudTh>Id</MudTh>
             <MudTh>Name</MudTh>
             <MudTh>Action</MudTh>
         </HeaderContent>
         <RowTemplate>
-            <MudTd DataLabel="Nr">@context.Id</MudTd>
-                <MudTd DataLabel="Sign">@context.Name</MudTd>
-                <MudTd>
-                    <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => UploadTest(context.Id))">Upload</MudButton>
-                    <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => NavigateToTestCases(context.Id))">Cases</MudButton>
-                    <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => NavigateToTest(context.Id))">View</MudButton>
-                    <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => DeleteTest(context.Id))">Delete</MudButton>
-                </MudTd>
-            </RowTemplate>
-            <PagerContent>
-                <MudTablePager PageSizeOptions="new int[] { 5, 10, 20, 100 }"
-                               RowsPerPageString="@rowsPerPageString"
-                               InfoFormat="@infoFormat"
-                               AllItemsText="@allItemsText"
-                               HorizontalAlignment="@horizontalAlignment" />
+            <MudTd DataLabel="Sign">@context.Name</MudTd>
+            <MudTd>
+                <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => UploadTest(context.Id))">Open</MudButton>
+                <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => NavigateToTestCases(context.Id))">Cases</MudButton>
+                <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => NavigateToTest(context.Id))">Edit</MudButton>
+                <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => DeleteTest(context.Id))">Delete</MudButton>
+            </MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager PageSizeOptions="new int[] { 5, 10, 20, 100 }"
+                RowsPerPageString="@rowsPerPageString"
+                InfoFormat="@infoFormat"
+                AllItemsText="@allItemsText"
+                HorizontalAlignment="@horizontalAlignment" />
             </PagerContent>
         </MudTable>
     <MudButton Class="mt-4" Variant="Variant.Outlined" Size="Size.Small" OnClick="@OpenAddTestModal">Add New Test</MudButton>
@@ -57,18 +61,20 @@ else
         userId = authenticationstate.User.Claims.First(x => x.Type == "ID").Value;
         tests = await TestService.GetAll();
         tests = tests.Where(x => x.UserId == Guid.Parse(userId)).ToList();
-        await BreadcrumbService.Reset();
-        await BreadcrumbService.AddItem(new("Tests", "/tests"));
+        await BreadcrumbService.SetItems([new(text: "Tests", href: "/tests", icon: Icons.Material.Filled.AllInbox)]);
         await BreadcrumbService.RefreshLayout();
     }
     private async Task DeleteTest(Guid testId)
     {
+        string uploadPath = Path.Combine(env.WebRootPath, "Upload", userId, testId.ToString());
+        await FileHandlingService.RemoveAllFiles(uploadPath);
+
         await TestService.Delete(testId);
         tests = await TestService.GetAll();
     }
     private async Task UploadTest(Guid testId)
     {
-        Navigation.NavigateTo($"/upload/{testId}");
+        Navigation.NavigateTo($"/test/{testId}/open");
     }
     private void OpenAddTestModal()
     {

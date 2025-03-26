@@ -1,4 +1,4 @@
-﻿@page "/account/logout"
+﻿@page "/public/logout"
 
 @using BlazorApp2.Helpers
 @using BlazorApp2.Models.ViewModels
@@ -33,7 +33,7 @@
         if (HttpContext.User.Identity.IsAuthenticated)
         {
             await HttpContext.SignOutAsync();
-            navigationManager.NavigateTo("/account/login", true);
+            navigationManager.NavigateTo("", true);
         }
     }
 

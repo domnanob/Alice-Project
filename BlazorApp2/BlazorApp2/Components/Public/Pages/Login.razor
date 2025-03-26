@@ -1,4 +1,4 @@
-﻿@page "/account/login"
+﻿@page "/public/login"
 @using BlazorApp2.Components.Layout
 @using BlazorApp2.Helpers
 @using BlazorApp2.Models.ViewModels
@@ -74,7 +74,7 @@
     private string errorMessage;
 
     protected override async Task OnInitializedAsync() {
-        Layout.ResetLayout();
+        Layout.LoginLayout();
         users = await UserService.GetAll();
         roles = await RoleService.GetAll();
     }

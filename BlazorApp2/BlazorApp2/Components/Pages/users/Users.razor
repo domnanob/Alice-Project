@@ -53,8 +53,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         users = await UserService.GetAll();
-        await BreadcrumbService.Reset();
-        await BreadcrumbService.AddItem(new("Users", "/users"));
+        await BreadcrumbService.SetItems([new(text: "Users", href: "/users", icon: Icons.Material.Filled.Storage)]);
         await BreadcrumbService.RefreshLayout();
     }
 

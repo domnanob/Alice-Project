@@ -40,13 +40,24 @@ namespace BlazorApp2.Services
             }
         }
 
-        public async Task<string> ReadFileContent(string path)
+        public async Task<string> ReadFileContentFormatted(string path)
         {
             string filedata = "";
             StreamReader sr = new StreamReader(path);
             while (!sr.EndOfStream)
             {
                 filedata += sr.ReadLine() + "<br>";
+            }
+            sr.Close();
+            return filedata;
+        }
+        public async Task<List<string>> ReadFileContentRaw(string path)
+        {
+            List<string> filedata = new();
+            StreamReader sr = new StreamReader(path);
+            while (!sr.EndOfStream)
+            {
+                filedata.Add(sr.ReadLine());
             }
             sr.Close();
             return filedata;

@@ -10,7 +10,8 @@ namespace BlazorApp2.Services
         Task RemoveFiles(string path, IList<IBrowserFile> files);
         Task RemoveAllFiles(string path);
         Task<List<String>> ReadFiles(String path);
-        Task<String> ReadFileContent(String path);
+        Task<String> ReadFileContentFormatted(String path);
+        Task<List<String>> ReadFileContentRaw(String path);
 
     }
 }

@@ -1,5 +1,4 @@
-# 🎓 LMS Homework Checker
-
+# 🎓 Alice Project
 This project is a software tool designed to assist in verifying programming assignments submitted via LMS systems. It is aimed at university instructors, allowing them to test submitted code without the need for a full development environment.
 
 ---

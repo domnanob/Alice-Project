@@ -11,7 +11,7 @@ namespace ConsoleApp6
     {
         static void Main(string[] args)
         {
-            string s = Console.ReadLine();
+            String s = Console.ReadLine();
             Console.WriteLine(s);
             Console.WriteLine(s);
         }

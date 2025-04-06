@@ -71,6 +71,7 @@ else
 
         await TestService.Delete(testId);
         tests = await TestService.GetAll();
+        tests = tests.Where(x => x.UserId == Guid.Parse(userId)).ToList();
     }
     private async Task UploadTest(Guid testId)
     {

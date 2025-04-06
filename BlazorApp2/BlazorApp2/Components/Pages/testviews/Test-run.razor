@@ -211,14 +211,13 @@
         testres.Output = string.Join("<br>", resultList);
         if (CompareOutputs(resultList, testOutput))
         {
-            testResult = "Success!";
             testres.State = TestState.Passed;
         }
         else
         {
-            testResult = "Error!";
             testres.State = TestState.Failed;
         }
+        testResult = testResults.Count(x => x.State == TestState.Passed) + "/" + (testResults.Count(x => x.State == TestState.Passed) + testResults.Count(x => x.State == TestState.Failed)) + "Passed";
         StateHasChanged();
     }
     private async void AllTestCompile()

@@ -6,9 +6,13 @@ This project is a software tool designed to assist in verifying programming assi
 ## 🚀 Key Features
 
 ✔️ **Automated Code Execution:** Submitted `.cs` files are automatically built and executed. 
+
 ✔️ **Test Case-Based Verification:** Student work is validated against predefined test cases set by the instructor. 
+
 ✔️ **Output and Error Display:** Results and errors are clearly presented for easy review. 
+
 ✔️ **Simple Web Interface:** Teachers can effortlessly upload and check submitted assignments.
+
 
 ---
 

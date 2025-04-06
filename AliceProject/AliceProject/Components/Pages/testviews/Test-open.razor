@@ -1,0 +1,179 @@
+﻿@page "/test/{testId}/open"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components.Forms
+@inject IWebHostEnvironment env
+@inject IDialogService DialogService
+@inject NavigationManager Navigation
+@inject IModelService<TestCase> TestCaseService
+@inject IModelService<Test> TestService
+@inject IModelService<StudentTest> StudentTestService
+@inject IBreadcrumbService BreadcrumbService
+@inject IFileHandlingService FileHandlingService
+@attribute [Authorize()]
+
+<PageTitle>Test View</PageTitle>
+<MudGrid Spacing="10">
+    <MudItem xs="12" lg="6">
+        <MudPaper Elevation="2" Class="d-flex overflow-x-auto align-start justify-start mud-width-full py-8" Style="min-width:300px;" Height="500px">
+            <MudList T="string" Class="pa-4" Style="width:100%;">
+
+                <MudText Class="d-flex" Inline="true">
+                    <MudText Class="d-flex ">
+                        <h5><MudIcon Icon="@Icons.Material.Filled.Folder" Style="font-size: 2rem;" /><span class="align-middle pl-2">Selected: @_files.Count()</span></h5>
+                    </MudText>
+                </MudText>
+
+                <MudDivider />
+                @if (_files.Count != 0)
+                {
+                    @foreach (var file in _files)
+                    {
+                        <MudListItem Icon="@Icons.Material.Filled.AttachFile" @key="@file">
+                            @file.Name <code>@file.Size bytes</code>
+                        </MudListItem>
+                    }
+                }
+                else
+                {
+                    <MudListItem>No files selected.</MudListItem>
+                }
+            </MudList>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" lg="6">
+        <MudPaper Elevation="2" Class="d-flex overflow-x-auto align-start justify-start mud-width-full py-8" Style="min-width:300px;" Height="500px">
+            <MudList T="string" Class="pa-4" Style="width:100%;">
+                <h5><MudIcon Icon="@Icons.Material.Filled.Folder" Style="font-size: 2rem;" /><span class="align-middle pl-2">Uploaded Files</span></h5>
+                <MudDivider />
+                @if (uploadedFiles != null && uploadedFiles.Count != 0)
+                {
+                    @foreach (var file in uploadedFiles)
+                    {
+                        <MudListItem Style="width:100%;" Icon="@Icons.Custom.FileFormats.FileCode" OnClick="() => OpenDialogAsync(file)">
+                            <MudText>@file<MudText Inline="true"><MudIconButton Icon="@Icons.Material.Filled.Remove" Color="Color.Inherit" Edge="Edge.End" OnClick="@(() => DeleteFile(file))" /></MudText></MudText>
+                        </MudListItem>
+                    }
+                }
+                else
+                {
+                    <MudListItem>No files uploaded!</MudListItem>
+                }
+            </MudList>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+<div class="d-flex">
+    <MudFileUpload Class="mt-5"  T="IReadOnlyList<IBrowserFile>" FilesChanged="UploadFiles">
+        <ActivatorContent>
+            <MudButton Variant="Variant.Outlined" Color="Color.Default">Choose Files</MudButton>
+        </ActivatorContent>
+    </MudFileUpload>
+    <MudButton StartIcon="@Icons.Material.Filled.CloudUpload" Class="mt-5 ml-5" Variant="Variant.Outlined" OnClick="@HandleFileSelected" Disabled="@disableUpload">Upload Files</MudButton>
+    <MudSpacer />
+    <MudButton EndIcon="@Icons.Material.Filled.ArrowForwardIos" Class="mt-5 ml-5" Variant="Variant.Outlined" OnClick="@NavigateToCases">Test Cases</MudButton>
+</div>
+
+@code {
+    [Parameter]
+    public String testId { get; set; }
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    IList<IBrowserFile> _files = new List<IBrowserFile>();
+    private bool disableUpload { get; set; } = true;
+
+    private String userId { get; set; }
+    private List<string> uploadedFiles = new();
+    private List<string> filecontents = new();
+    private List<TestCase> testCases = new();
+    private String uploadPath = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authenticationstate = await authenticationStateTask;
+        testCases = await TestCaseService.GetAll();
+        var test = await TestService.Get(Guid.Parse(testId));
+        userId = authenticationstate.User.Claims.First(x => x.Type == "ID").Value;
+        testCases = testCases.Where(x => x.TestId == Guid.Parse(testId)).ToList();
+
+        uploadPath = Path.Combine(env.WebRootPath, "Upload", userId, testId);
+        ListUploadedFiles();
+
+        await BreadcrumbService.SetItems([new(text: "Tests", href: "/tests", icon: Icons.Material.Filled.AllInbox), new(test.Name, $"/test/{testId}/open", icon: Icons.Material.Filled.EditNote)]);
+        await BreadcrumbService.RefreshLayout();
+
+    }
+    private async void UploadFiles(IReadOnlyList<IBrowserFile> files)
+    {
+        foreach (var file in files)
+        {
+            _files.Add(file);
+        }
+        disableUpload = false;
+    }
+    private async Task HandleFileSelected()
+    {
+        await FileHandlingService.CreateFiles(uploadPath, _files);
+        foreach (var item in _files)
+        {
+            await StudentTestService.Add(new()
+            {
+                PassedCount = 0,
+                StudentName = "Neptunkod"+item.Name, // Itt ki kell majd nyerni a neptunkódot
+                TestId = Guid.Parse(testId)
+            });
+        }
+
+        ListUploadedFiles();
+        StateHasChanged();
+        _files.Clear();
+        disableUpload = true;
+    }
+    private async void ListUploadedFiles()
+    {
+        uploadedFiles = await FileHandlingService.ReadFiles(uploadPath);
+    }
+    private async void DeleteFile(string filename)
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = false, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var parameters = new DialogParameters<Dialogs.Dialog>
+        {
+            { x => x.DialogTitle, "Delete File"},
+            { x => x.ContentText, "Are you sure about to delete "+filename+"?"}
+        };
+        var d = await DialogService.ShowAsync<Dialogs.ConfirmDialog>("Confirm Dialog", parameters, options);
+        var result = await d.Result;
+        if (!result.Canceled)
+        {
+            await FileHandlingService.RemoveFile(uploadPath, filename);
+
+            var stests = await StudentTestService.GetAll();
+            var stestid = stests.FirstOrDefault(x => x.StudentName == filename).Id;
+
+            await StudentTestService.Delete(stestid);
+            ListUploadedFiles();
+            StateHasChanged();
+        }
+    }
+    private Task OpenDialogAsync(string filename)
+    {
+        String filedata = "";
+        StreamReader sr = new StreamReader(uploadPath + "/" + filename);
+        while (!sr.EndOfStream)
+        {
+            filedata += sr.ReadLine() + "<br>";
+        }
+        sr.Close();
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+        var parameters = new DialogParameters<Dialogs.Dialog>
+        {
+            { x => x.DialogTitle, filename},
+            { x => x.ContentText, filedata},
+        };
+        return DialogService.ShowAsync<Dialogs.Dialog>("Code Dialog", parameters, options);
+    }
+    private void NavigateToCases()
+    {
+        Navigation.NavigateTo($"/tests/{testId}/cases");
+    }
+}

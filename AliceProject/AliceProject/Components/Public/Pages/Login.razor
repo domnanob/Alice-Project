@@ -1,0 +1,106 @@
+﻿@page "/public/login"
+@using AliceProject.Components.Layout
+@using AliceProject.Helpers
+@using AliceProject.Models.ViewModels
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+
+@inject NavigationManager navigationManager
+@inject IModelService<User> UserService
+@inject IModelService<Role> RoleService
+@inject IBreadcrumbService BreadcrumbService
+
+@*
+<EditForm Model="@Model" OnSubmit="Authenticate" FormName="LoginForm">
+    <MudGrid>
+        <MudItem xs="12" sm="7">
+            <MudCard>
+                <MudCardContent>
+                    <MudTextField Label="Email" Class="mt-3" @bind-Value="Model.Email" />
+                    <ValidationMessage For="() => Model.Email" />
+                    <MudTextField Label="Password" Class="mt-3"@bind-Value="Model.Password" InputType="InputType.Password" />
+                    <ValidationMessage For="() => Model.Password" />
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Login</MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+</EditForm>
+*@
+
+<div class="row">
+    <div class="col-lg-4 offset-lg-4 pt-4 pb-4 border">
+        <EditForm Model="@Model" OnValidSubmit="Authenticate" FormName="LoginForm">
+            <div class="mb-3 text center flex-column">
+                <h3>Login</h3>
+            </div>
+            <div class="mb-3">
+                <label>Email</label>
+                <InputText @bind-Value="Model.Email" class="form-control" placeholder="Email" />
+                <ValidationMessage For="() => Model.Email" />
+            </div>
+            <div class="mb-3">
+                <label>Password</label>
+                <InputText type="password" @bind-Value="Model.Password" class="form-control" placeholder="Password" />
+                <ValidationMessage For="() => Model.Password" />
+            </div>
+            
+            <div class="mb-3 text-center">
+                <span class="text-danger">@errorMessage</span>
+            </div>
+            <div class="mb-3 d-grid gap-2">
+                <button type="submit" class="btn btn-primary">Login</button>
+            </div>
+        </EditForm>
+    </div>
+</div>
+@code {
+    [CascadingParameter]
+    public HttpContext? HttpContext { get; set; }
+    [CascadingParameter]
+    public MainLayout? Layout { get; set; }
+
+    [SupplyParameterFromForm]
+    public LoginViewModel Model { get; set; } = new();
+
+    [Inject] ISnackbar Snackbar { get; set; }
+
+
+    private List<User> users;
+    private List<Role> roles;
+    private string errorMessage;
+
+    protected override async Task OnInitializedAsync() {
+        Layout.LoginLayout();
+        users = await UserService.GetAll();
+        roles = await RoleService.GetAll();
+    }
+
+
+    private async Task Authenticate(EditContext context)
+    {
+        User userAccount = users.Where(x => x.Email == Model.Email).FirstOrDefault();
+        if (userAccount is null || !(new PasswordHandling().Verify(Model.Password, userAccount.Password)))
+        {
+            errorMessage = "Invalid Email or Password";
+
+        }
+        else
+        {
+            var role = roles.Where(x => x.Id == userAccount.RoleId).FirstOrDefault();
+            var claims = new List<Claim>
+            {
+                new Claim("ID", userAccount.Id+""),
+                new Claim(ClaimTypes.Email, userAccount.Email),
+                new Claim(ClaimTypes.Role, role.Name)
+            };
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
+            await HttpContext.SignInAsync(principal);
+            navigationManager.NavigateTo("/");
+        }
+    }
+}

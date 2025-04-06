@@ -68,7 +68,7 @@
                 </MudListSubheader>
             <MudText Class="pa-2">
                 <pre>
-                    @((MarkupString)@selectedTestCode)
+                        @((MarkupString)@selectedTestCode)
                 </pre>
             </MudText>
         </MudPaper>
@@ -141,7 +141,6 @@
     }
 </MudExpansionPanels>
 
-
 @code {
     [Parameter]
     public String testId { get; set; }
@@ -204,7 +203,7 @@
         string caseuploadPath = Path.Combine(env.WebRootPath, "Upload", userId, testId, "TestCases", testres.Testcase.Id.ToString());
         string testInputs = await FileHandlingService.ReadFileContentFormatted(Path.Combine(caseuploadPath, "Input", testres.Testcase.Input));
         String res = await FileCompilerService.ExecuteCommand(uploadPath + "/", selectedTestName, testInputs.Split("<br>"));
-        await FileHandlingService.RemoveFile(uploadPath + "/", selectedTestName + ".exe");
+        FileHandlingService.RemoveFile(uploadPath + "/", selectedTestName + ".exe");
 
         List<string> resultList = res.Split("\n\r\n")[1].Split("\r\n").ToList();
         List<string> testOutput = await FileHandlingService.ReadFileContentRaw(Path.Combine(caseuploadPath, "Output", testres.Testcase.ExpectedOutput));
@@ -248,7 +247,7 @@
         {
             return false;
         }
-        return true;
+        return out1.Count - 1 == out2.Count; //ha kevesebb van false
     }
 
     protected override async Task OnInitializedAsync()

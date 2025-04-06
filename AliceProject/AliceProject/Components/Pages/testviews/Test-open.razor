@@ -1,6 +1,7 @@
 ﻿@page "/test/{testId}/open"
 @rendermode InteractiveServer
 @using Microsoft.AspNetCore.Components.Forms
+@using System.IO.Compression
 @inject IWebHostEnvironment env
 @inject IDialogService DialogService
 @inject NavigationManager Navigation
@@ -9,6 +10,7 @@
 @inject IModelService<StudentTest> StudentTestService
 @inject IBreadcrumbService BreadcrumbService
 @inject IFileHandlingService FileHandlingService
+@inject ISnackbar Snackbar
 @attribute [Authorize()]
 
 <PageTitle>Test View</PageTitle>
@@ -26,10 +28,12 @@
                 <MudDivider />
                 @if (_files.Count != 0)
                 {
-                    @foreach (var file in _files)
+                    @for (int i = 0; i < _files.Count; i++)
                     {
-                        <MudListItem Icon="@Icons.Material.Filled.AttachFile" @key="@file">
-                            @file.Name <code>@file.Size bytes</code>
+                        var item = _files[i];
+                        var name = neptuncodes[i];
+                        <MudListItem Icon="@Icons.Material.Filled.AttachFile" @key="@item">
+                            @item.Name - @name <code>@item.Size bytes</code>
                         </MudListItem>
                     }
                 }
@@ -63,9 +67,14 @@
     </MudItem>
 </MudGrid>
 <div class="d-flex">
-    <MudFileUpload Class="mt-5"  T="IReadOnlyList<IBrowserFile>" FilesChanged="UploadFiles">
+    <MudFileUpload Class="mt-5" T="IReadOnlyList<IBrowserFile>" FilesChanged="UploadFiles" MaximumFileCount="1" Accept=".cs">
         <ActivatorContent>
             <MudButton Variant="Variant.Outlined" Color="Color.Default">Choose Files</MudButton>
+        </ActivatorContent>
+    </MudFileUpload>
+    <MudFileUpload Class="mt-5" T="IReadOnlyList<IBrowserFile>" FilesChanged="UploadFilesFromZip" MaximumFileCount="1" Accept=".zip">
+        <ActivatorContent>
+            <MudButton Variant="Variant.Outlined" Color="Color.Default">Choose Canvas Zip</MudButton>
         </ActivatorContent>
     </MudFileUpload>
     <MudButton StartIcon="@Icons.Material.Filled.CloudUpload" Class="mt-5 ml-5" Variant="Variant.Outlined" OnClick="@HandleFileSelected" Disabled="@disableUpload">Upload Files</MudButton>
@@ -87,7 +96,7 @@
     private List<string> filecontents = new();
     private List<TestCase> testCases = new();
     private String uploadPath = "";
-
+    private List<String> neptuncodes { get; set; } = new();
     protected override async Task OnInitializedAsync()
     {
         var authenticationstate = await authenticationStateTask;
@@ -105,23 +114,65 @@
     }
     private async void UploadFiles(IReadOnlyList<IBrowserFile> files)
     {
+
+        var options = new DialogOptions { CloseOnEscapeKey = false };
+        var dialogReference = await DialogService.ShowAsync<Dialogs.NeptunIdDialog>("Add Student Test", options);
+        var dialogResult = await dialogReference.Result;
+        if (dialogResult.Canceled)
+        {
+            Snackbar.Add("No Neptun Id was given!", Severity.Error);
+            return;
+        }
+        else
+        {
+            neptuncodes.Add($"{dialogResult.Data}");
+            foreach (var file in files)
+            {
+                _files.Add(file);
+            }
+            disableUpload = false;
+            StateHasChanged();
+        }
+
+    }
+    private async void UploadFilesFromZip(IReadOnlyList<IBrowserFile> files)
+    {
+        IList<IBrowserFile> _zipfile = new List<IBrowserFile>();
         foreach (var file in files)
         {
-            _files.Add(file);
+            _zipfile.Add(file);
         }
-        disableUpload = false;
-    }
-    private async Task HandleFileSelected()
-    {
-        await FileHandlingService.CreateFiles(uploadPath, _files);
-        foreach (var item in _files)
+
+        List<String> filesAdded =  await FileHandlingService.CreateFilesFromZip(uploadPath, _zipfile);
+        foreach (var item in filesAdded)
         {
             await StudentTestService.Add(new()
             {
-                PassedCount = 0,
-                StudentName = "Neptunkod"+item.Name, // Itt ki kell majd nyerni a neptunkódot
-                TestId = Guid.Parse(testId)
+                    PassedCount = 0,
+                    StudentName = item,
+                    TestId = Guid.Parse(testId)
             });
+        }
+        ListUploadedFiles();
+        StateHasChanged();
+
+    }
+    private async Task HandleFileSelected()
+    {
+        await FileHandlingService.CreateFiles(uploadPath, _files, neptuncodes);
+        int i = 0;
+        foreach (var item in _files)
+        {
+            if (!uploadedFiles.Contains(neptuncodes[i] + "_" + item.Name))
+            {
+                await StudentTestService.Add(new()
+                    {
+                        PassedCount = 0,
+                        StudentName = neptuncodes[i] + "_" + item.Name,
+                        TestId = Guid.Parse(testId)
+                    });
+            }
+            i++;
         }
 
         ListUploadedFiles();

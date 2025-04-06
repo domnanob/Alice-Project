@@ -1,0 +1,33 @@
+﻿@inject ISnackbar Snackbar
+<MudDialog>
+    <TitleContent>
+        <MudText>Enter the student's Neptune code!</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField @bind-Value="_returnValue" Label="Neptun ID" Variant="Variant.Text"></MudTextField>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; }
+    private string _returnValue;
+
+    private void Submit()
+    {
+        if (_returnValue != "" || _returnValue != null)
+        {
+            MudDialog.Close(DialogResult.Ok(_returnValue.ToUpper()));
+        }
+        else
+        {
+            Snackbar.Add("No Neptun Id was given!", Severity.Error);
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+}

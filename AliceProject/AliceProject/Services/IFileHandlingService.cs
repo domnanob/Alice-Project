@@ -4,7 +4,8 @@ namespace AliceProject.Services
 {
     public interface IFileHandlingService
     {
-        Task CreateFiles(string path, IList<IBrowserFile> files);
+        Task CreateFiles(string path, IList<IBrowserFile> files, List<String> NeptunIDs);
+        Task<List<String>> CreateFilesFromZip(string path, IList<IBrowserFile> files);
         Task CreateTestFile(string path, IList<IBrowserFile> files);
         Task RemoveFile(string path, string filename);
         Task RemoveFiles(string path, IList<IBrowserFile> files);

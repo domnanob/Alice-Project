@@ -47,9 +47,13 @@ dotnet run
 ## 📌 Usage
 
 1️⃣ **Access** the web interface. 
+
 2️⃣ **Upload** student-submitted C# source files. 
+
 3️⃣ **Define** the test cases. 
+
 4️⃣ **Run** the verification and **review** the results.
+
 
 ---
 

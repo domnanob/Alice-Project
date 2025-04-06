@@ -5,7 +5,10 @@ This project is a software tool designed to assist in verifying programming assi
 
 ## 🚀 Key Features
 
-✔️ **Automated Code Execution:** Submitted `.cs` files are automatically built and executed. ✔️ **Test Case-Based Verification:** Student work is validated against predefined test cases set by the instructor. ✔️ **Output and Error Display:** Results and errors are clearly presented for easy review. ✔️ **Simple Web Interface:** Teachers can effortlessly upload and check submitted assignments.
+✔️ **Automated Code Execution:** Submitted `.cs` files are automatically built and executed. 
+✔️ **Test Case-Based Verification:** Student work is validated against predefined test cases set by the instructor. 
+✔️ **Output and Error Display:** Results and errors are clearly presented for easy review. 
+✔️ **Simple Web Interface:** Teachers can effortlessly upload and check submitted assignments.
 
 ---
 
@@ -39,7 +42,10 @@ dotnet run
 
 ## 📌 Usage
 
-1️⃣ **Access** the web interface. 2️⃣ **Upload** student-submitted C# source files. 3️⃣ **Define** the test cases. 4️⃣ **Run** the verification and **review** the results.
+1️⃣ **Access** the web interface. 
+2️⃣ **Upload** student-submitted C# source files. 
+3️⃣ **Define** the test cases. 
+4️⃣ **Run** the verification and **review** the results.
 
 ---
 

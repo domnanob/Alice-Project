@@ -36,7 +36,13 @@ cd Alice-Project
 dotnet restore
 ```
 
-4️⃣ **Start the server:**
+4️⃣ **Run migrations:**
+
+```sh
+Update-Database
+```
+
+5️⃣ **Start the server:**
 
 ```sh
 dotnet run

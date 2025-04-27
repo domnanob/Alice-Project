@@ -74,7 +74,7 @@ This project utilizes the following NuGet packages:
 - `Microsoft.EntityFrameworkCore.SqlServer`v9.0.2
 - `Microsoft.EntityFrameworkCore.Tools` v9.0.2
 - `MudBlazor` v8.3.0
-- 
+
 ---
 
 ## 🤝 Contributing

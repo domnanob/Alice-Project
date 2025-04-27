@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AliceProject.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250321185248_AppMigration")]
+    [Migration("20250423184755_AppMigration")]
     partial class AppMigration
     {
         /// <inheritdoc />
@@ -24,31 +24,6 @@ namespace AliceProject.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("AliceProject.Models.Club", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ClubName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Country")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("YearFounded")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Clubs");
-                });
 
             modelBuilder.Entity("AliceProject.Models.Role", b =>
                 {
@@ -94,6 +69,9 @@ namespace AliceProject.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Directory")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -125,6 +103,10 @@ namespace AliceProject.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Input")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

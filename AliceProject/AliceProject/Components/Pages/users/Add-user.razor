@@ -5,6 +5,7 @@
 @inject IModelService<User> UserService
 @inject IModelService<Role> RoleService
 @inject IBreadcrumbService BreadcrumbService
+@inject ISnackbar Snackbar
 @inject NavigationManager Navigation
 @attribute [Authorize(Roles = "admin")]
 
@@ -15,29 +16,21 @@
 }
 else
 {
-    <div class="mb-3">
-        <label for="userFirstName" class="form-label">First Name</label>
-        <input type="text" class="form-control" id="userName" @bind="newUserFirstName" />
-    </div>
-    <div class="mb-3">
-        <label for="userLastName" class="form-label">Last Name</label>
-        <input type="text" class="form-control" id="userLastName" @bind="newUserLastName" />
-    </div>
-    <div class="mb-3">
-        <label for="emailAddress" class="form-label">Email Address</label>
-        <input type="email" class="form-control" id="emailAddress" @bind="emailAddress" />
-    </div>
-    <div class="mb-3">
-        <label for="newPassword" class="form-label">Password</label>
-        <input type="password" class="form-control" id="newPassword" @bind="newPassword" />
-    </div>
-    <select class="form-control" name="roles" id="roles" @onchange="(e => ChangeRole(e))">
-        <option value="choose">Choose!</option>
-        @foreach (var role in roles)
-        {
-            <option value="@role.Id" >@role.Name</option>
-        }
-    </select>
+    <MudPaper Elevation="2" Class="px-16 py-8 ma-2">
+        <MudTextField @bind-Value="newUserFirstName" Label="First Name" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
+        <MudTextField @bind-Value="newUserLastName" Label="Last Name" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
+        <MudTextField @bind-Value="emailAddress" Label="Email Address" Variant="Variant.Outlined" Margin="Margin.Dense" InputType="InputType.Email"></MudTextField>
+        <MudTextField @bind-Value="newPassword" Label="Password" Variant="Variant.Outlined" Margin="Margin.Dense" InputType="InputType.Password"></MudTextField>
+        <select class="form-control" name="roles" id="roles" @onchange="(e => ChangeRole(e))">
+            <option value="choose">Choose!</option>
+            @foreach (var role in roles)
+            {
+                <option value="@role.Id">@role.Name</option>
+            }
+        </select>
+        <MudButton Class="mt-4" Variant="Variant.Outlined" OnClick="@Cancel">Cancel</MudButton>
+        <MudButton Class="mt-4" Variant="Variant.Outlined" OnClick="@InsertUser">Save</MudButton>
+    </MudPaper>
 }
 
 <button class="btn btn-secondary" @onclick="Cancel">Cancel</button>
@@ -59,7 +52,7 @@ else
             newrole = e.Value.ToString();
         }
     }
-    
+
     protected override async Task OnInitializedAsync()
     {
         roles = await RoleService.GetAll();
@@ -69,28 +62,31 @@ else
 
     private async Task InsertUser()
     {
-        // Create a new club object
-        var user = new Models.User
-            {
-                FirstName = newUserFirstName,
-                LastName = newUserLastName,
-                Email = emailAddress,
-                Password = new PasswordHandling().Hash(newPassword),
-                RoleId = Guid.Parse(newrole)
-            };
+        if (newUserFirstName == null || newUserLastName == null || emailAddress == null || newPassword == null || newrole == null ||
+            newUserFirstName == "" || newUserLastName == "" || emailAddress == "" || newPassword == "" || newrole == "choose")
+        {
+            Snackbar.Add("You must fill all field!", Severity.Error);
+        }
+        else
+        {
+            var user = new Models.User
+                {
+                    FirstName = newUserFirstName,
+                    LastName = newUserLastName,
+                    Email = emailAddress,
+                    Password = new PasswordHandling().Hash(newPassword),
+                    RoleId = Guid.Parse(newrole)
+                };
+            await UserService.Add(user);
 
-        // Insert the club into the database
-        await UserService.Add(user);
-
-        // Close the modal and navigate back to the club page
-        Navigation.NavigateTo("/users");
-        StateHasChanged();
-
+            Navigation.NavigateTo("/users");
+            StateHasChanged();
+            Snackbar.Add("user Added!", Severity.Success);
+        }
     }
 
     private void Cancel()
     {
-        // Close the modal and navigate back to the club page
         Navigation.NavigateTo("/users");
     }
 }

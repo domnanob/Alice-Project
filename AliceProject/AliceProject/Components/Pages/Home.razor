@@ -3,6 +3,8 @@
 @inject ISnackbar Snackbar
 @inject IBreadcrumbService BreadcrumbService
 @inject IModelService<User> UserService
+@inject IModelService<Test> TestService
+@inject NavigationManager Navigation
 
 <PageTitle>Home</PageTitle>
 @if (user == null)
@@ -22,8 +24,8 @@
                     <MudDivider />
                     <MudListItem Text="Login" Href="/public/login" Icon="@Icons.Material.Filled.Login" />
                     <MudListItem Text="Register" Href="/public/register" Icon="@Icons.Material.Filled.HowToReg" />
-                    <MudListItem Text="How to use" Href="#" Icon="@Icons.Material.Filled.HelpCenter" />
-                    <MudListItem Text="Help" Href="#" SecondaryText="Feel free to contact us" Icon="@Icons.Material.Filled.QuestionAnswer" />
+                    <MudListItem Text="How to use" Href="/howtouse" Icon="@Icons.Material.Filled.HelpCenter" />
+                    <MudListItem Text="Contact" Href="/contact" SecondaryText="Feel free to contact us" Icon="@Icons.Material.Filled.QuestionAnswer" />
                 </MudList>
             </MudPaper>
         </MudItem>
@@ -32,10 +34,10 @@
                 <MudList T="string">
                 <h5>About Alice</h5>
                     <MudDivider />
-                    <MudListItem Text="Whats new?" Href="#" Icon="@Icons.Material.Filled.Star" />
-                    <MudListItem Text="About us" Href="#" Icon="@Icons.Material.Filled.People" />
-                    <MudListItem Text="FAQ" Href="#" Icon="@Icons.Material.Filled.QuestionMark" />
-                    <MudListItem Text="Policies" Href="#" Icon="@Icons.Material.Filled.Rule" />
+                    <MudListItem Text="Whats new?" Href="/news" Icon="@Icons.Material.Filled.Star" />
+                    <MudListItem Text="About us" Href="/about" Icon="@Icons.Material.Filled.People" />
+                    <MudListItem Text="FAQ" Href="/faq" Icon="@Icons.Material.Filled.QuestionMark" />
+                    <MudListItem Text="Policies" Href="/policies" Icon="@Icons.Material.Filled.Rule" />
                 </MudList>
             </MudPaper>
         </MudItem>
@@ -46,27 +48,27 @@
     <MudIcon Icon="@Icons.Material.Filled.Home" Style="font-size: 4rem;" />
     <h2>Welcome @user.LastName!</h2>
     <MudGrid>
-        <MudItem xs="6">
+        <MudItem xs="12" md="6">
             <MudPaper Elevation="0" Class="d-flex align-start justify-start mud-width-full py-8">
                 <MudList T="string">
                     <h5>Start working</h5>
                     <MudDivider />
                     <MudListItem Text="Tests" Href="/tests" Icon="@Icons.Material.Filled.AllInbox" />
                     <MudListItem Text="Create Test" Href="@("/tests/"+user.Id+"/add")" Icon="@Icons.Material.Filled.Add" />
-                    <MudListItem Text="Open Previous" Href="#" Icon="@Icons.Material.Filled.HelpCenter" />
-                    <MudListItem Text="Profile" Href="#" SecondaryText="Feel free to contact us" Icon="@Icons.Material.Filled.QuestionAnswer" />
+                    <MudListItem Text="Open Previous" OnClick="RedirectToPrevious" Icon="@Icons.Material.Filled.HelpCenter" />
+                    <MudListItem Text="Profile" Href="/profile" Icon="@Icons.Material.Filled.QuestionAnswer" />
                 </MudList>
             </MudPaper>
         </MudItem>
-        <MudItem xs="6">
+        <MudItem xs="12" md="6">
             <MudPaper Elevation="0" Class="d-flex align-start justify-start mud-width-full py-8">
                 <MudList T="string">
                     <h5>About Alice</h5>
                     <MudDivider />
-                    <MudListItem Text="Whats new?" Href="#" Icon="@Icons.Material.Filled.Star" />
-                    <MudListItem Text="About us" Href="#" Icon="@Icons.Material.Filled.People" />
-                    <MudListItem Text="FAQ" Href="#" Icon="@Icons.Material.Filled.QuestionMark" />
-                    <MudListItem Text="Policies" Href="#" Icon="@Icons.Material.Filled.Rule" />
+                    <MudListItem Text="Whats new?" Href="/news" Icon="@Icons.Material.Filled.Star" />
+                    <MudListItem Text="About us" Href="/about" Icon="@Icons.Material.Filled.People" />
+                    <MudListItem Text="FAQ" Href="/faq" Icon="@Icons.Material.Filled.QuestionMark" />
+                    <MudListItem Text="Policies" Href="/policies" Icon="@Icons.Material.Filled.Rule" />
                 </MudList>
             </MudPaper>
         </MudItem>
@@ -98,5 +100,17 @@
         }
         await BreadcrumbService.Reset();
         await BreadcrumbService.RefreshLayout();
+    }
+    private async void RedirectToPrevious()
+    {
+        List<Test> tests = await TestService.GetAll();
+        if (tests.Any(x => x.UserId == user.Id))
+        {
+            Navigation.NavigateTo($"/test/{tests.Where(x => x.UserId == user.Id).OrderByDescending(x => x.CreatedAt).First().Id}/open");
+        }
+        else
+        {
+            Snackbar.Add("No Test created!", Severity.Error);
+        }
     }
 }

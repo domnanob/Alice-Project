@@ -1,4 +1,4 @@
-﻿@page "/tests/update/{testId}"
+﻿@page "/tests/update/{userId}/{testId}"
 @rendermode InteractiveServer
 @using AliceProject.Models
 @inject IModelService<Test> TestService
@@ -25,6 +25,8 @@ else
 
 @code {
     [Parameter]
+    public String userId { get; set; }
+    [Parameter]
     public String testId { get; set; }
 
     private Models.Test test;
@@ -32,7 +34,10 @@ else
     protected override async Task OnInitializedAsync()
     {
         test = await TestService.Get(Guid.Parse(testId));
-        await BreadcrumbService.SetItems([new(text: "Tests", href: "/tests", icon: Icons.Material.Filled.AllInbox), new(text: "Edit", href: $"/tests/update/{testId}", icon: Icons.Material.Filled.Edit)]);
+        await BreadcrumbService.SetItems([new(text: "Users", href: "/users", icon: Icons.Material.Filled.Storage),
+            new(text: userId, href: "/users", icon: Icons.Material.Filled.Storage),
+            new(text: "Tests", href: $"/tests/{userId}", icon: Icons.Material.Filled.AllInbox),
+            new(text: "Tests", href: $"/tests/{userId}/{testId}", icon: Icons.Material.Filled.Edit)]);
         await BreadcrumbService.RefreshLayout();
     }
 
@@ -51,6 +56,6 @@ else
 
     private void Cancel()
     {
-        Navigation.NavigateTo("/tests");
+        Navigation.NavigateTo($"/tests/{userId}");
     }
 }

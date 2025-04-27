@@ -22,32 +22,7 @@ namespace AliceProject.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("BlazorApp2.Models.Club", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ClubName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Country")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("YearFounded")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Clubs");
-                });
-
-            modelBuilder.Entity("BlazorApp2.Models.Role", b =>
+            modelBuilder.Entity("AliceProject.Models.Role", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -62,7 +37,7 @@ namespace AliceProject.Migrations
                     b.ToTable("Roles");
                 });
 
-            modelBuilder.Entity("BlazorApp2.Models.StudentTest", b =>
+            modelBuilder.Entity("AliceProject.Models.StudentTest", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -85,11 +60,14 @@ namespace AliceProject.Migrations
                     b.ToTable("StudentTests");
                 });
 
-            modelBuilder.Entity("BlazorApp2.Models.Test", b =>
+            modelBuilder.Entity("AliceProject.Models.Test", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Directory")
                         .IsRequired()
@@ -111,7 +89,7 @@ namespace AliceProject.Migrations
                     b.ToTable("Tests");
                 });
 
-            modelBuilder.Entity("BlazorApp2.Models.TestCase", b =>
+            modelBuilder.Entity("AliceProject.Models.TestCase", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -125,6 +103,10 @@ namespace AliceProject.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid>("TestId")
                         .HasColumnType("uniqueidentifier");
 
@@ -135,7 +117,7 @@ namespace AliceProject.Migrations
                     b.ToTable("TestCases");
                 });
 
-            modelBuilder.Entity("BlazorApp2.Models.User", b =>
+            modelBuilder.Entity("AliceProject.Models.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -170,9 +152,9 @@ namespace AliceProject.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("BlazorApp2.Models.StudentTest", b =>
+            modelBuilder.Entity("AliceProject.Models.StudentTest", b =>
                 {
-                    b.HasOne("BlazorApp2.Models.Test", "Test")
+                    b.HasOne("AliceProject.Models.Test", "Test")
                         .WithMany()
                         .HasForeignKey("TestId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -181,9 +163,9 @@ namespace AliceProject.Migrations
                     b.Navigation("Test");
                 });
 
-            modelBuilder.Entity("BlazorApp2.Models.Test", b =>
+            modelBuilder.Entity("AliceProject.Models.Test", b =>
                 {
-                    b.HasOne("BlazorApp2.Models.User", "User")
+                    b.HasOne("AliceProject.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -192,9 +174,9 @@ namespace AliceProject.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BlazorApp2.Models.TestCase", b =>
+            modelBuilder.Entity("AliceProject.Models.TestCase", b =>
                 {
-                    b.HasOne("BlazorApp2.Models.Test", "Test")
+                    b.HasOne("AliceProject.Models.Test", "Test")
                         .WithMany()
                         .HasForeignKey("TestId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -203,9 +185,9 @@ namespace AliceProject.Migrations
                     b.Navigation("Test");
                 });
 
-            modelBuilder.Entity("BlazorApp2.Models.User", b =>
+            modelBuilder.Entity("AliceProject.Models.User", b =>
                 {
-                    b.HasOne("BlazorApp2.Models.Role", "Role")
+                    b.HasOne("AliceProject.Models.Role", "Role")
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)

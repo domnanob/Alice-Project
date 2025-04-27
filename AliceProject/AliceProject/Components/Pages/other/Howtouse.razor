@@ -1,0 +1,81 @@
+﻿@page "/howtouse"
+@rendermode InteractiveServer
+@inject ISnackbar Snackbar
+@inject IBreadcrumbService BreadcrumbService
+@inject IModelService<User> UserService
+
+<PageTitle>How To Use</PageTitle>
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-6">
+
+    <MudText Typo="Typo.h4" GutterBottom="true"><MudIcon Style="font-size: 4rem;" Icon="@Icons.Material.Filled.RocketLaunch" Title="RocketLaunch" /> How to Use the Application</MudText>
+    <MudText Typo="Typo.body1" Class="mb-4">
+        This page guides you through the main features and steps of using the application effectively.
+    </MudText>
+
+    <MudExpansionPanels Elevation="1">
+
+        <MudExpansionPanel Text="1. Registering an account">
+            <MudText Typo="Typo.body2">
+                If you're a new user, navigate to the registration page and enter your name, email address, and a secure password.
+                After submission, your account will be created and you'll be redirected to the login page.
+            </MudText>
+        </MudExpansionPanel>
+
+        <MudExpansionPanel Text="2. Logging in">
+            <MudText Typo="Typo.body2">
+                Enter your registered email and password on the login page. Upon successful login, you’ll be directed to the dashboard.
+                The session lasts for 30 minutes or until you manually log out.
+            </MudText>
+        </MudExpansionPanel>
+
+        <MudExpansionPanel Text="3. Uploading assignment files">
+            <MudText Typo="Typo.body2">
+                Navigate to the Assignments section. You can upload C# source files (.cs) one by one or as a ZIP archive (Canvas export format).
+                The system extracts the files and assigns them to student identifiers based on filenames.
+            </MudText>
+        </MudExpansionPanel>
+
+        <MudExpansionPanel Text="4. Creating test cases">
+            <MudText Typo="Typo.body2">
+                Go to the Tests page to define input and expected output pairs. These files will be used to evaluate each student submission automatically.
+                Ensure the format matches the program’s expected input/output precisely.
+            </MudText>
+        </MudExpansionPanel>
+
+        <MudExpansionPanel Text="5. Running tests on submissions">
+            <MudText Typo="Typo.body2">
+                In the Assignments view, select a student’s file and choose a test case to run.
+                The system will compile and execute the program with the selected input and compare the result to the expected output.
+            </MudText>
+        </MudExpansionPanel>
+
+        <MudExpansionPanel Text="6. Reviewing test results">
+            <MudText Typo="Typo.body2">
+                Test results are displayed in real-time after execution. You'll see statuses like Passed, Failed, Compilation Error, or Timeout.
+                Use this to identify problems in student submissions quickly.
+            </MudText>
+        </MudExpansionPanel>
+
+        <MudExpansionPanel Text="7. Managing your profile">
+            <MudText Typo="Typo.body2">
+                Click on your avatar in the top right corner and go to the Profile page. You can update your name or password from there.
+            </MudText>
+        </MudExpansionPanel>
+
+        <MudExpansionPanel Text="8. Logging out safely">
+            <MudText Typo="Typo.body2">
+                Use the Logout option in the profile menu to end your session securely. This clears your login token.
+            </MudText>
+        </MudExpansionPanel>
+
+    </MudExpansionPanels>
+
+</MudContainer>
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await BreadcrumbService.SetItems([new(text: "How To Use", href: "/howtouse", icon: Icons.Material.Filled.HelpCenter)]);
+        await BreadcrumbService.RefreshLayout();
+
+    }
+}

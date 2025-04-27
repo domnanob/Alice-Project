@@ -6,8 +6,8 @@
 @inject IModelService<User> UserService
 @inject IModelService<Role> RoleService
 
-<div class="row">
-    <div class="col-lg-4 offset-lg-4 pt-4 pb-4 border">
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-6">
+    <MudPaper Elevation="1" Class="pa-6" MaxWidth="400px">
         <EditForm Model="@Model" OnValidSubmit="Registration" FormName="RegistrationForm">
             <DataAnnotationsValidator />
             <div class="mb-3 text center flex-column">
@@ -42,11 +42,11 @@
                 <span class="text-danger">@errorMessage</span>
             </div>
             <div class="mb-3 d-grid gap-2">
-                <button type="submit" class="btn btn-primary">Register</button>
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Inherit">Register</MudButton>
             </div>
         </EditForm>
-    </div>
-</div>
+    </MudPaper>
+</MudContainer>
 
 @code {
     [CascadingParameter]

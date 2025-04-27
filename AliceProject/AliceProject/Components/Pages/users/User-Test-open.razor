@@ -1,4 +1,4 @@
-﻿@page "/test/{testId}/open"
+﻿@page "/test/{userId}/{testId}/open"
 @rendermode InteractiveServer
 @using Microsoft.AspNetCore.Components.Forms
 @using System.IO.Compression
@@ -11,39 +11,10 @@
 @inject IBreadcrumbService BreadcrumbService
 @inject IFileHandlingService FileHandlingService
 @inject ISnackbar Snackbar
-@attribute [Authorize()]
+@attribute [Authorize(Roles = "admin")]
 
 <PageTitle>Test View</PageTitle>
 <MudGrid Spacing="10">
-    <MudItem xs="12" lg="6">
-        <MudPaper Elevation="2" Class="d-flex overflow-x-auto align-start justify-start mud-width-full py-8" Style="min-width:300px;" Height="500px">
-            <MudList T="string" Class="pa-4" Style="width:100%;">
-
-                <MudText Class="d-flex" Inline="true">
-                    <MudText Class="d-flex ">
-                        <h5><MudIcon Icon="@Icons.Material.Filled.Folder" Style="font-size: 2rem;" /><span class="align-middle pl-2">Selected: @_files.Count()</span></h5>
-                    </MudText>
-                </MudText>
-
-                <MudDivider />
-                @if (_files.Count != 0)
-                {
-                    @for (int i = 0; i < _files.Count; i++)
-                    {
-                        var item = _files[i];
-                        var name = neptuncodes[i];
-                        <MudListItem Icon="@Icons.Material.Filled.AttachFile" @key="@item">
-                            @item.Name - @name <code>@item.Size bytes</code>
-                        </MudListItem>
-                    }
-                }
-                else
-                {
-                    <MudListItem>No files selected.</MudListItem>
-                }
-            </MudList>
-        </MudPaper>
-    </MudItem>
     <MudItem xs="12" lg="6">
         <MudPaper Elevation="2" Class="d-flex overflow-x-auto align-start justify-start mud-width-full py-8" Style="min-width:300px;" Height="500px">
             <MudList T="string" Class="pa-4" Style="width:100%;">
@@ -67,31 +38,18 @@
     </MudItem>
 </MudGrid>
 <div class="d-flex">
-    <MudFileUpload Class="mt-5" T="IReadOnlyList<IBrowserFile>" FilesChanged="UploadFiles" MaximumFileCount="1" Accept=".cs">
-        <ActivatorContent>
-            <MudButton Variant="Variant.Outlined" Color="Color.Default">Choose Files</MudButton>
-        </ActivatorContent>
-    </MudFileUpload>
-    <MudFileUpload Class="mt-5" T="IReadOnlyList<IBrowserFile>" FilesChanged="UploadFilesFromZip" MaximumFileCount="1" Accept=".zip">
-        <ActivatorContent>
-            <MudButton Variant="Variant.Outlined" Color="Color.Default">Choose Canvas Zip</MudButton>
-        </ActivatorContent>
-    </MudFileUpload>
-    <MudButton StartIcon="@Icons.Material.Filled.CloudUpload" Class="mt-5 ml-5" Variant="Variant.Outlined" OnClick="@HandleFileSelected" Disabled="@disableUpload">Upload Files</MudButton>
-    <MudSpacer />
     <MudButton EndIcon="@Icons.Material.Filled.ArrowForwardIos" Class="mt-5 ml-5" Variant="Variant.Outlined" OnClick="@NavigateToCases">Test Cases</MudButton>
 </div>
 
 @code {
     [Parameter]
+    public String userId { get; set; }
+    [Parameter]
     public String testId { get; set; }
-    [CascadingParameter]
-    private Task<AuthenticationState> authenticationStateTask { get; set; }
 
     IList<IBrowserFile> _files = new List<IBrowserFile>();
     private bool disableUpload { get; set; } = true;
 
-    private String userId { get; set; }
     private List<string> uploadedFiles = new();
     private List<string> filecontents = new();
     private List<TestCase> testCases = new();
@@ -99,10 +57,8 @@
     private List<String> neptuncodes { get; set; } = new();
     protected override async Task OnInitializedAsync()
     {
-        var authenticationstate = await authenticationStateTask;
         testCases = await TestCaseService.GetAll();
         var test = await TestService.Get(Guid.Parse(testId));
-        userId = authenticationstate.User.Claims.First(x => x.Type == "ID").Value;
         testCases = testCases.Where(x => x.TestId == Guid.Parse(testId)).ToList();
 
         uploadPath = Path.Combine(env.WebRootPath, "Upload", userId, testId);
@@ -111,76 +67,6 @@
         await BreadcrumbService.SetItems([new(text: "Tests", href: "/tests", icon: Icons.Material.Filled.AllInbox), new(test.Name, $"/test/{testId}/open", icon: Icons.Material.Filled.EditNote)]);
         await BreadcrumbService.RefreshLayout();
 
-    }
-    private async void UploadFiles(IReadOnlyList<IBrowserFile> files)
-    {
-
-        var options = new DialogOptions { CloseOnEscapeKey = false };
-        var dialogReference = await DialogService.ShowAsync<Dialogs.NeptunIdDialog>("Add Student Test", options);
-        var dialogResult = await dialogReference.Result;
-        if (dialogResult.Canceled)
-        {
-            Snackbar.Add("No Neptun Id was given!", Severity.Error);
-            return;
-        }
-        else
-        {
-            neptuncodes.Add($"{dialogResult.Data}");
-            foreach (var file in files)
-            {
-                _files.Add(file);
-            }
-            disableUpload = false;
-            StateHasChanged();
-        }
-
-    }
-    private async void UploadFilesFromZip(IReadOnlyList<IBrowserFile> files)
-    {
-        IList<IBrowserFile> _zipfile = new List<IBrowserFile>();
-        foreach (var file in files)
-        {
-            _zipfile.Add(file);
-        }
-
-        List<String> filesAdded =  await FileHandlingService.CreateFilesFromZip(uploadPath, _zipfile);
-        foreach (var item in filesAdded)
-        {
-            await StudentTestService.Add(new()
-            {
-                    PassedCount = 0,
-                    StudentName = item,
-                    TestId = Guid.Parse(testId)
-            });
-        }
-        ListUploadedFiles();
-        StateHasChanged();
-        Snackbar.Add("Upload successful!", Severity.Success);
-
-    }
-    private async Task HandleFileSelected()
-    {
-        await FileHandlingService.CreateFiles(uploadPath, _files, neptuncodes);
-        int i = 0;
-        foreach (var item in _files)
-        {
-            if (!uploadedFiles.Contains(neptuncodes[i] + "_" + item.Name))
-            {
-                await StudentTestService.Add(new()
-                    {
-                        PassedCount = 0,
-                        StudentName = neptuncodes[i] + "_" + item.Name,
-                        TestId = Guid.Parse(testId)
-                    });
-            }
-            i++;
-        }
-
-        ListUploadedFiles();
-        StateHasChanged();
-        _files.Clear();
-        disableUpload = true;
-        Snackbar.Add("Upload successful!", Severity.Success);
     }
     private async void ListUploadedFiles()
     {
@@ -228,6 +114,6 @@
     }
     private void NavigateToCases()
     {
-        Navigation.NavigateTo($"/tests/{testId}/cases");
+        Navigation.NavigateTo($"/tests/{userId}/{testId}/cases");
     }
 }

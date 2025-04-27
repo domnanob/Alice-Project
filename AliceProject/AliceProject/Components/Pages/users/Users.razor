@@ -2,7 +2,12 @@
 @rendermode InteractiveServer
 @inject NavigationManager Navigation
 @inject IBreadcrumbService BreadcrumbService
+@inject IDialogService DialogService
 @inject IModelService<User> UserService
+@inject IModelService<Test> TestService
+@inject IWebHostEnvironment env
+@inject ISnackbar Snackbar
+@inject IFileHandlingService FileHandlingService
 @attribute [Authorize(Roles="admin")]
 <h3>Users Table</h3>
 @if (users == null)
@@ -27,6 +32,7 @@ else
             <MudTd DataLabel="Name">@context.LastName</MudTd>
             <MudTd DataLabel="Position">@context.Email</MudTd>
             <MudTd>
+                <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => NavigateToTests(context.Id))">Tests</MudButton>
                 <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => NavigateToUpdate(context.Id))">Update</MudButton>
                 <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => DeleteUser(context.Id))">Delete</MudButton>
             </MudTd>
@@ -39,7 +45,7 @@ else
                                HorizontalAlignment="@horizontalAlignment" />
             </PagerContent>
     </MudTable>
-    <MudButton Class="mt-4" Variant="Variant.Outlined" Size="Size.Small" OnClick="@OpenAddUserModal">Add New User</MudButton>
+    <MudButton Class="mt-4" Variant="Variant.Outlined" OnClick="@OpenAddUserModal">Add New User</MudButton>
 }
 
 
@@ -66,12 +72,35 @@ else
     {
         Navigation.NavigateTo($"/users/update/{userId}");
     }
-
+    private void NavigateToTests(Guid userId)
+    {
+        Navigation.NavigateTo($"/tests/{userId}");
+    }
     private async Task DeleteUser(Guid userId)
     {
+        var options = new DialogOptions { CloseOnEscapeKey = false, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var parameters = new DialogParameters<Dialogs.CodeDialog>
+        {
+            { x => x.DialogTitle, "Delete User"},
+            { x => x.ContentText, "Are you sure about to delete "+(await UserService.Get(userId)).LastName+"?"}
+        };
+        var d = await DialogService.ShowAsync<Dialogs.ConfirmDialog>("Confirm Dialog", parameters, options);
+        var result = await d.Result;
+        if (!result.Canceled)
+        {
+            string uploadPath = Path.Combine(env.WebRootPath, "Upload", userId.ToString());
+            await FileHandlingService.RemoveAllFiles(uploadPath);
 
-        await UserService.Delete(userId);
+            List<Test> userTests = await TestService.GetAll();
+            userTests = userTests.Where(x => x.UserId == userId).ToList();
+            foreach (var item in userTests)
+            {
+                await TestService.Delete(item.Id);
+            }
+            await UserService.Delete(userId);
 
-        users = await UserService.GetAll();
+            users = await UserService.GetAll();
+            Snackbar.Add("User Removed!", Severity.Success);
+        }
     }
 }

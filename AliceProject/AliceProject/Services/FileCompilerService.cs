@@ -4,7 +4,19 @@ namespace AliceProject.Services
 {
     public class FileCompilerService : IFileCompilerService
     {
-        private const string csc_path = "C:\\Windows\\Microsoft.NET\\Framework\\v3.5\\csc.exe";
+        private string csc_path => getCSCPath();
+
+        private string getCSCPath() {
+            string v3 = "C:\\Windows\\Microsoft.NET\\Framework\\v3.5\\csc.exe";
+            string v4 = "C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\csc.exe"; //uj windowsos
+            if (File.Exists(v4))
+            {
+                return v4;
+            }
+            else { 
+                return v3;
+            }
+        }
         public async Task<string> ExecuteCommand(string filepath, string filename, string[]? param)
         {
             try

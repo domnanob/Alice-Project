@@ -144,7 +144,7 @@
     {
         if (_inputfiles.Count == 0 || _outputfiles.Count == 0)
         {
-            Snackbar.Add("Kötelező feltölteni be és kimeneti fájlokat a teszteléshez!", Severity.Error);
+            Snackbar.Add("It is required to upload input and output files for testing!", Severity.Error);
             return;
         }
 
@@ -159,6 +159,7 @@
         await TestCaseService.Add(testcase);
         Navigation.NavigateTo($"/tests/{testId}/cases");
         StateHasChanged();
+        Snackbar.Add("Test Case Added!", Severity.Success);
     }
 
     private async void Cancel()

@@ -1,4 +1,4 @@
-﻿@page "/users/update/{userId}"
+﻿@page "/profile"
 @rendermode InteractiveServer
 @using AliceProject.Helpers
 @using AliceProject.Models
@@ -6,9 +6,9 @@
 @inject IBreadcrumbService BreadcrumbService
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
-@attribute [Authorize(Roles = "admin")]
+@attribute [Authorize()]
 
-<h3>Update User</h3>
+<h3>Edit Profile</h3>
 
 @if (user == null)
 {
@@ -20,8 +20,8 @@ else
         <MudTextField @bind-Value="user.FirstName" Label="First Name" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
         <MudTextField @bind-Value="user.LastName" Label="Last Name" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
         <MudTextField @bind-Value="user.Email" Label="Email Address" Variant="Variant.Outlined" Margin="Margin.Dense" InputType="InputType.Email"></MudTextField>
-        <MudTextField @bind-Value="password" Label="Password" Variant="Variant.Outlined" Margin="Margin.Dense" InputType="InputType.Password"></MudTextField>
-        <MudTextField @bind-Value="passwordAgain" Label="Password Again" Variant="Variant.Outlined" Margin="Margin.Dense" InputType="InputType.Password"></MudTextField>
+        <MudTextField @bind-Value="password" Label="New Password" Variant="Variant.Outlined" Margin="Margin.Dense" InputType="InputType.Password"></MudTextField>
+        <MudTextField @bind-Value="passwordAgain" Label="New Password Again" Variant="Variant.Outlined" Margin="Margin.Dense" InputType="InputType.Password"></MudTextField>
 
         <MudButton Class="mt-4" Variant="Variant.Outlined" OnClick="@Cancel">Cancel</MudButton>
         <MudButton Class="mt-4" Variant="Variant.Outlined" OnClick="@UpdateUser">Save</MudButton>
@@ -29,27 +29,25 @@ else
 }
 
 @code {
-    [Parameter]
-    public String userId { get; set; }
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
 
+    private String userId;
     private Models.User user;
     private String password;
     private String passwordAgain;
 
     protected override async Task OnInitializedAsync()
     {
+        var authenticationstate = await authenticationStateTask;
+        userId = authenticationstate.User.Claims.First(x => x.Type == "ID").Value;
         user = await UserService.Get(Guid.Parse(userId));
-        await BreadcrumbService.SetItems([new(text: "Users", href: "/users", icon: Icons.Material.Filled.Storage), new(text: "Edit", href: $"/users/update/{userId}", icon: Icons.Material.Filled.Edit)]);
+        await BreadcrumbService.SetItems([new(text: "Profile", href: "/profile", icon: Icons.Material.Filled.Edit)]);
         await BreadcrumbService.RefreshLayout();
     }
 
     private async Task UpdateUser()
     {
-        if (user.FirstName == "" || user.LastName == "" || user.Email == "")
-        {
-            Snackbar.Add("Cannot change to empty field!", Severity.Error);
-            return;
-        }
         if (password != null && password != "")
         {
             if (password == passwordAgain)
@@ -64,12 +62,12 @@ else
         }
 
         await UserService.Update(user);
-        Navigation.NavigateTo("/users");
-        Snackbar.Add("User Updated!", Severity.Success);
+
+        Navigation.NavigateTo("/");
     }
 
     private void Cancel()
     {
-        Navigation.NavigateTo("/users");
+        Navigation.NavigateTo("/");
     }
 }

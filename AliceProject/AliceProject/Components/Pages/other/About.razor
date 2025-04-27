@@ -1,0 +1,119 @@
+﻿@page "/about"
+@rendermode InteractiveServer
+@inject ISnackbar Snackbar
+@inject IBreadcrumbService BreadcrumbService
+@inject IModelService<User> UserService
+
+<PageTitle>About Us</PageTitle>
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-6">
+
+    <MudText Typo="Typo.h4" GutterBottom="true"><MudIcon Style="font-size: 4rem;" Icon="@Icons.Material.Filled.Person" Title="Person" /> About Us</MudText>
+    <MudText Typo="Typo.body1" Class="mb-4">
+        Learn more about the motivation, goals, and background of this project.
+    </MudText>
+
+    <MudExpansionPanels Elevation="1">
+
+        <MudExpansionPanel>
+            <TitleContent>
+                <div class="d-flex">
+                    <MudIcon Icon="@Icons.Material.Filled.AdsClick" class="mr-3"></MudIcon>
+                    <MudText>Project Goal</MudText>
+                </div>
+            </TitleContent>
+            <ChildContent>
+                <MudText Typo="Typo.body2">
+                    The goal of this application is to assist university instructors in evaluating programming assignments submitted by students through LMS platforms such as Canvas.
+                    It automates the tedious parts of the grading process, especially for C# assignments.
+                </MudText>
+            </ChildContent>
+        </MudExpansionPanel>
+
+        <MudExpansionPanel>
+            <TitleContent>
+                <div class="d-flex">
+                    <MudIcon Icon="@Icons.Material.Filled.Lightbulb" class="mr-3"></MudIcon>
+                    <MudText>Motivation</MudText>
+                </div>
+            </TitleContent>
+            <ChildContent>
+                <MudText Typo="Typo.body2">
+                    I created the project as my BSc thesis. Due to the complexity of the project, time was extremely limited. In the end, I managed to create the dream form with a lot of work, which I can primarily thank to the person closest to me. <MudTooltip Text="Lili❤">Love you ❤!</MudTooltip>
+                </MudText>
+            </ChildContent>
+        </MudExpansionPanel>
+
+        <MudExpansionPanel>
+            <TitleContent>
+                <div class="d-flex">
+                    <MudIcon Icon="@Icons.Material.Filled.Handyman" class="mr-3"></MudIcon>
+                    <MudText>Core Features</MudText>
+                </div>
+            </TitleContent>
+            <ChildContent>
+                <MudText Typo="Typo.body2">
+                    - Unpacking and processing Canvas ZIP submissions<br />
+                    - Compiling and running C# source files<br />
+                    - Creating and applying input/output test cases<br />
+                    - Viewing results and test statuses in real time<br />
+                    - Managing user sessions and roles (admin, teacher)
+                </MudText>
+            </ChildContent>
+        </MudExpansionPanel>
+
+        <MudExpansionPanel>
+            <TitleContent>
+                <div class="d-flex">
+                    <MudIcon Icon="@Icons.Material.Filled.Power" class="mr-3"></MudIcon>
+                    <MudText>Technologies Used</MudText>
+                </div>
+            </TitleContent>
+            <ChildContent>
+                <MudText Typo="Typo.body2">
+                    The system was developed using Blazor Server with C# and .NET, combined with the MudBlazor UI library.
+                    Backend logic supports file processing, compilation, and secure session handling.
+                </MudText>
+            </ChildContent>
+        </MudExpansionPanel>
+
+        <MudExpansionPanel>
+            <TitleContent>
+                <div class="d-flex">
+                    <MudIcon Icon="@Icons.Material.Filled.MenuBook" class="mr-3"></MudIcon>
+                    <MudText>Academic Context</MudText>
+                </div>
+            </TitleContent>
+            <ChildContent>
+                <MudText Typo="Typo.body2">
+                    This application was developed as part of a thesis project focusing on automation in educational software systems.
+                    It aligns with modern e-learning needs and aims to reduce the workload on instructors.
+                </MudText>
+            </ChildContent>
+        </MudExpansionPanel>
+
+        <MudExpansionPanel>
+            <TitleContent>
+                <div class="d-flex">
+                    <MudIcon Icon="@Icons.Material.Filled.Call" class="mr-3"></MudIcon>
+                    <MudText>Contact & Feedback</MudText>
+                </div>
+            </TitleContent>
+            <ChildContent>
+                <MudText Typo="Typo.body2">
+                    Feedback and feature suggestions are always welcome!
+                    Please reach out via the university's internal communication channels or email the developer directly.
+                </MudText>
+            </ChildContent>
+        </MudExpansionPanel>
+
+    </MudExpansionPanels>
+
+</MudContainer>
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await BreadcrumbService.SetItems([new(text: "About", href: "/about", icon: Icons.Material.Filled.People)]);
+        await BreadcrumbService.RefreshLayout();
+        
+    }
+}

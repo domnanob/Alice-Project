@@ -1,0 +1,59 @@
+﻿@page "/news"
+@rendermode InteractiveServer
+@inject ISnackbar Snackbar
+@inject IBreadcrumbService BreadcrumbService
+@inject IModelService<User> UserService
+
+<PageTitle>News</PageTitle>
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-6">
+
+    <MudText Typo="Typo.h4" GutterBottom="true"><MudIcon Style="font-size: 4rem;" Icon="@Icons.Material.Filled.Newspaper" Title="News" /> What's New – Release Notes</MudText>
+    <MudText Typo="Typo.body1" Class="mb-4">
+        This page lists updates, new features, improvements, and bug fixes in the software.
+    </MudText>
+
+    <MudPaper Class="p-4 mb-6" Elevation="1">
+        <MudText Typo="Typo.h6"><MudIcon Style="font-size: 2rem;" Icon="@Icons.Material.Filled.Inventory2" Title="Box" /> Version: 1.0.0 – Initial Release</MudText>
+        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-2"><MudIcon Icon="@Icons.Material.Filled.CalendarMonth" Title="CalendarMonth" /> Release date: April 16, 2025</MudText>
+
+        <MudText Typo="Typo.subtitle2" Class="mt-2"><MudIcon Icon="@Icons.Material.Filled.AssignmentTurnedIn" Title="AssignmentTurnedIn" /> Key Features:</MudText>
+        <MudList T="String" Dense="true">
+            <MudListItem>Import ZIP files exported from Canvas LMS</MudListItem>
+            <MudListItem>Automatic extraction, processing, and compilation of C# source files</MudListItem>
+            <MudListItem>Test execution based on input and expected output files</MudListItem>
+            <MudListItem>File-based result comparison with auto-scoring</MudListItem>
+            <MudListItem>Exam management: create, edit, and delete exams</MudListItem>
+            <MudListItem>Student file uploads manually or via ZIP</MudListItem>
+            <MudListItem>Test case handling: upload input/output files and run tests</MudListItem>
+            <MudListItem>User management: login, profile editing, password change</MudListItem>
+            <MudListItem>Admin features: role management, access to other users' exams</MudListItem>
+        </MudList>
+
+        <MudText Typo="Typo.subtitle2" Class="mt-4"><MudIcon Icon="@Icons.Material.Filled.BugReport" Title="BugReport" /> Known Issues / Limitations:</MudText>
+        <MudList T="String" Dense="true">
+            <MudListItem>C# execution only works correctly with standard input/output</MudListItem>
+            <MudListItem>No detailed error logging currently available</MudListItem>
+            <MudListItem>ZIP extraction does not support nested folders</MudListItem>
+        </MudList>
+    </MudPaper>
+
+    <MudPaper Class="p-4" Elevation="1">
+        <MudText Typo="Typo.h6"><MudIcon Icon="@Icons.Material.Filled.NextWeek" Title="NextWeek" /> Coming in Next Version (1.1.0 - In Development):</MudText>
+        <MudList T="String" Dense="true">
+            <MudListItem><MudIcon Icon="@Icons.Material.Filled.Build" Title="Build" /> Parallel test execution for faster grading</MudListItem>
+            <MudListItem><MudIcon Icon="@Icons.Material.Filled.Build" Title="Build" /> Extended error logs with compile/runtime details</MudListItem>
+            <MudListItem><MudIcon Icon="@Icons.Material.Filled.Build" Title="Build" /> Test console preview to view raw output</MudListItem>
+            <MudListItem><MudIcon Icon="@Icons.Material.Filled.Build" Title="Build" /> Downloadable grading reports (PDF/CSV)</MudListItem>
+            <MudListItem><MudIcon Icon="@Icons.Material.Filled.Build" Title="Build" /> Customizable scoring rules</MudListItem>
+        </MudList>
+    </MudPaper>
+
+</MudContainer>
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await BreadcrumbService.SetItems([new(text: "News", href: "/news", icon: Icons.Material.Filled.Star)]);
+        await BreadcrumbService.RefreshLayout();
+
+    }
+}

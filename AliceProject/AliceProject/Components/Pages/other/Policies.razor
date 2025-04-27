@@ -1,0 +1,102 @@
+﻿@page "/policies"
+@rendermode InteractiveServer
+@inject ISnackbar Snackbar
+@inject IBreadcrumbService BreadcrumbService
+@inject IModelService<User> UserService
+
+
+<PageTitle>Policies</PageTitle>
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-6">
+
+    <MudText Typo="Typo.h4" GutterBottom="true"><MudIcon Style="font-size: 4rem;" Icon="@Icons.Material.Filled.Policy" Title="Person" /> Policies</MudText>
+    <MudText Typo="Typo.body1" Class="mb-4">
+        Please read the following policies regarding the use of this application, data handling, and responsibilities.
+    </MudText>
+
+    <MudExpansionPanels Elevation="1">
+        <MudExpansionPanel>
+            <TitleContent>
+                <div class="d-flex">
+                    <MudIcon Icon="@Icons.Material.Filled.Lock" class="mr-3"></MudIcon>
+                    <MudText>Data Privacy</MudText>
+                </div>
+            </TitleContent>
+            <ChildContent>
+                <MudText Typo="Typo.body2">
+                    We respect your privacy. User data such as name, email address, and uploaded content are stored securely
+                    and are never shared with third parties. Authentication tokens are stored in secure HTTP-only cookies that expire after 30 minutes of inactivity.
+                </MudText>
+            </ChildContent>
+        </MudExpansionPanel>
+
+        <MudExpansionPanel>
+            <TitleContent>
+                <div class="d-flex">
+                    <MudIcon Icon="@Icons.Material.Filled.Folder" class="mr-3"></MudIcon>
+                    <MudText>File Handling & Storage</MudText>
+                </div>
+            </TitleContent>
+            <ChildContent>
+                <MudText Typo="Typo.body2">
+                    All uploaded student files and test cases are stored on the server temporarily and are used solely for educational evaluation.
+                    Files can be deleted at any time by the user or an administrator. The system only accepts .cs files and Canvas-generated ZIP archives up to 1GB.
+                </MudText>
+            </ChildContent>
+        </MudExpansionPanel>
+
+        <MudExpansionPanel>
+            <TitleContent>
+                <div class="d-flex">
+                    <MudIcon Icon="@Icons.Material.Filled.Balance" class="mr-3"></MudIcon>
+                    <MudText>Terms of Use</MudText>
+                </div>
+            </TitleContent>
+            <ChildContent>
+                <MudText Typo="Typo.body2">
+                    This application is intended for academic use only. Users must not upload any malicious or copyrighted content.
+                    By using the system, you agree to use it solely for evaluating student submissions and agree not to misuse the platform.
+                </MudText>
+            </ChildContent>
+        </MudExpansionPanel>
+
+        <MudExpansionPanel>
+            <TitleContent>
+                <div class="d-flex">
+                    <MudIcon Icon="@Icons.Material.Filled.BackHand" class="mr-3"></MudIcon>
+                    <MudText>Disclaimer</MudText>
+                </div>
+            </TitleContent>
+            <ChildContent>
+                <MudText Typo="Typo.body2">
+                    While the system is designed to assist with automated testing and grading, the final responsibility for evaluation remains with the instructor.
+                    We do not take responsibility for errors in test results caused by incorrect input/output files or student code behavior.
+                </MudText>
+            </ChildContent>
+        </MudExpansionPanel>
+
+        <MudExpansionPanel>
+            <TitleContent>
+                <div class="d-flex">
+                    <MudIcon Icon="@Icons.Material.Filled.AdminPanelSettings" class="mr-3"></MudIcon>
+                    <MudText>Administrator Responsibilities</MudText>
+                </div>
+            </TitleContent>
+            <ChildContent>
+                <MudText Typo="Typo.body2">
+                    Administrators have the ability to manage users, edit roles, and access all uploaded data. They are responsible for ensuring
+                    that users follow the system's guidelines and that sensitive data is handled appropriately.
+                </MudText>
+            </ChildContent>
+        </MudExpansionPanel>
+
+    </MudExpansionPanels>
+
+</MudContainer>
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await BreadcrumbService.SetItems([new(text: "Policies", href: "/policies", icon: Icons.Material.Filled.Rule)]);
+        await BreadcrumbService.RefreshLayout();
+
+    }
+}

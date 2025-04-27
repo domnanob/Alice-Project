@@ -1,0 +1,98 @@
+﻿@page "/faq"
+@rendermode InteractiveServer
+@inject ISnackbar Snackbar
+@inject IBreadcrumbService BreadcrumbService
+@inject IModelService<User> UserService
+
+<PageTitle>FAQ</PageTitle>
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-6">
+
+    <MudText Typo="Typo.h4" GutterBottom="true"><MudIcon Style="font-size: 4rem;" Icon="@Icons.Material.Filled.QuestionMark" Title="QuestionMark" /> Frequently Asked Questions</MudText>
+    <MudText Typo="Typo.body1" Class="mb-4">
+        This page answers some of the most common questions regarding the use of the application.
+    </MudText>
+
+    <MudExpansionPanels Elevation="1">
+
+        <MudExpansionPanel Text="How do I upload student files?">
+            <MudText Typo="Typo.body2">
+                You can upload student files either individually using the file selector (only .cs files are accepted),
+                or by uploading a ZIP file exported from Canvas LMS. The ZIP must follow the naming convention and contain only .cs files.
+            </MudText>
+        </MudExpansionPanel>
+
+        <MudExpansionPanel Text="What file types are supported?">
+            <MudText Typo="Typo.body2">
+                Currently, only C# source files (.cs) are supported. Input/output files for test cases must be in plain text format (.txt).
+            </MudText>
+        </MudExpansionPanel>
+
+        <MudExpansionPanel Text="Can I upload multiple files at once?">
+            <MudText Typo="Typo.body2">
+                Yes. You can select multiple .cs files for upload, and the system will associate each with a Neptun code.
+                You can also upload all at once using the ZIP method.
+            </MudText>
+        </MudExpansionPanel>
+
+        <MudExpansionPanel Text="What is a test case and how do I create one?">
+            <MudText Typo="Typo.body2">
+                A test case consists of an input file and an expected output file. When a student’s program runs,
+                it will receive the input and its output will be compared with the expected output.
+                You can create test cases by specifying these files manually under the Tests section.
+            </MudText>
+        </MudExpansionPanel>
+
+        <MudExpansionPanel Text="Why is my program marked as failed even though it seems correct?">
+            <MudText Typo="Typo.body2">
+                The comparison is strict and based on exact content. Extra spaces, new lines, or differences in output format
+                can cause a test to fail. Always match the expected format exactly.
+            </MudText>
+        </MudExpansionPanel>
+
+        <MudExpansionPanel Text="What does the 'Unknown' status in test results mean?">
+            <MudText Typo="Typo.body2">
+                It means the test case hasn’t been run yet for the selected program file. Run a specific test or all tests to get results.
+            </MudText>
+        </MudExpansionPanel>
+
+        <MudExpansionPanel Text="Can I delete or edit uploaded files and test cases?">
+            <MudText Typo="Typo.body2">
+                Yes. Uploaded files and test cases can be deleted or re-uploaded. Just click the corresponding delete or update icons.
+            </MudText>
+        </MudExpansionPanel>
+
+        <MudExpansionPanel Text="Is the platform mobile-friendly?">
+            <MudText Typo="Typo.body2">
+                Absolutely. The layout is fully responsive, and all features are accessible on smaller screens via adaptive design.
+            </MudText>
+        </MudExpansionPanel>
+
+        <MudExpansionPanel Text="What happens when I log out?">
+            <MudText Typo="Typo.body2">
+                Logging out deletes your authentication token. You will need to re-enter your credentials to log back in.
+            </MudText>
+        </MudExpansionPanel>
+
+        <MudExpansionPanel Text="How long does the login session last?">
+            <MudText Typo="Typo.body2">
+                Sessions last for 30 minutes by default, even if the browser is restarted. After that, you'll be automatically logged out.
+            </MudText>
+        </MudExpansionPanel>
+
+        <MudExpansionPanel Text="How can I change my password?">
+            <MudText Typo="Typo.body2">
+                Go to your Profile page and enter your current and new passwords. You'll need to confirm the new password twice.
+            </MudText>
+        </MudExpansionPanel>
+
+    </MudExpansionPanels>
+
+</MudContainer>
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await BreadcrumbService.SetItems([new(text: "FAQ", href: "/faq", icon: Icons.Material.Filled.QuestionMark)]);
+        await BreadcrumbService.RefreshLayout();
+
+    }
+}

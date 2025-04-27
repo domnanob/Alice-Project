@@ -1,12 +1,11 @@
-﻿@page "/tests"
+﻿@page "/tests/{userid}"
 @rendermode InteractiveServer
 @inject NavigationManager Navigation
 @inject IWebHostEnvironment env
-@inject IDialogService DialogService
 @inject IModelService<Test> TestService
 @inject IBreadcrumbService BreadcrumbService
 @inject IFileHandlingService FileHandlingService
-@attribute [Authorize()]
+@attribute [Authorize(Roles = "admin")]
 <h3>Tests</h3>
 
 @if (tests == null)
@@ -18,15 +17,14 @@ else
     <MudTable Items="@tests">
         <ColGroup>
             <col style="width: 50%;" />
+            <col style="width: 50%;" />
         </ColGroup>
         <HeaderContent>
             <MudTh>Name</MudTh>
-            <MudTh>Created At</MudTh>
             <MudTh>Action</MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Sign">@context.Name</MudTd>
-            <MudTd DataLabel="Sign">@context.CreatedAt</MudTd>
             <MudTd>
                 <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => UploadTest(context.Id))">Open</MudButton>
                 <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => NavigateToTestCases(context.Id))">Cases</MudButton>
@@ -42,15 +40,12 @@ else
                 HorizontalAlignment="@horizontalAlignment" />
             </PagerContent>
         </MudTable>
-    <MudButton Class="mt-4" Variant="Variant.Outlined" Size="Size.Small" OnClick="@OpenAddTestModal">Add New Test</MudButton>
 
 }
 
 @code {
+    [Parameter]
     public string userId { get; set; }
-
-    [CascadingParameter]
-    private Task<AuthenticationState> authenticationStateTask { get; set; }
 
     private List<Models.Test> tests;
     private HorizontalAlignment horizontalAlignment = HorizontalAlignment.Right;
@@ -59,49 +54,34 @@ else
     private string allItemsText = "All";
     protected override async Task OnInitializedAsync()
     {
-        var authenticationstate = await authenticationStateTask;
-        userId = authenticationstate.User.Claims.First(x => x.Type == "ID").Value;
         tests = await TestService.GetAll();
-        tests = tests.Where(x => x.UserId == Guid.Parse(userId)).OrderByDescending(x => x.CreatedAt).ToList();
-        await BreadcrumbService.SetItems([new(text: "Tests", href: "/tests", icon: Icons.Material.Filled.AllInbox)]);
+        tests = tests.Where(x => x.UserId == Guid.Parse(userId)).ToList();
+        await BreadcrumbService.SetItems([new(text: "Users", href: "/users", icon: Icons.Material.Filled.Storage), 
+            new(text: userId, href: "/users", icon: Icons.Material.Filled.Storage), 
+            new(text: "Tests", href: $"/tests/{userId}", icon: Icons.Material.Filled.AllInbox)]);
         await BreadcrumbService.RefreshLayout();
     }
     private async Task DeleteTest(Guid testId)
     {
-        var options = new DialogOptions { CloseOnEscapeKey = false, MaxWidth = MaxWidth.Small, FullWidth = true };
-        var parameters = new DialogParameters<Dialogs.CodeDialog>
-        {
-            { x => x.DialogTitle, "Delete Test"},
-            { x => x.ContentText, "Are you sure about to delete "+(await TestService.Get(testId)).Name+"?"}
-        };
-        var d = await DialogService.ShowAsync<Dialogs.ConfirmDialog>("Confirm Dialog", parameters, options);
-        var result = await d.Result;
-        if (!result.Canceled)
-        {
-            string uploadPath = Path.Combine(env.WebRootPath, "Upload", userId, testId.ToString());
-            await FileHandlingService.RemoveAllFiles(uploadPath);
+        string uploadPath = Path.Combine(env.WebRootPath, "Upload", userId, testId.ToString());
+        await FileHandlingService.RemoveAllFiles(uploadPath);
 
-            await TestService.Delete(testId);
-            tests = await TestService.GetAll();
-            tests = tests.Where(x => x.UserId == Guid.Parse(userId)).ToList();
-        }
+        await TestService.Delete(testId);
+        tests = await TestService.GetAll();
+        tests = tests.Where(x => x.UserId == Guid.Parse(userId)).ToList();
     }
     private async Task UploadTest(Guid testId)
     {
-        Navigation.NavigateTo($"/test/{testId}/open");
-    }
-    private void OpenAddTestModal()
-    {
-        Navigation.NavigateTo($"/tests/{userId}/add");
+        Navigation.NavigateTo($"/test/{userId}/{testId}/open");
     }
 
     private void NavigateToTest(Guid testId)
     {
-        Navigation.NavigateTo($"/tests/update/{testId}");
+        Navigation.NavigateTo($"/tests/update/{userId}/{testId}");
     }
     private void NavigateToTestCases(Guid testId)
     {
-        Navigation.NavigateTo($"/tests/{testId}/cases");
+        Navigation.NavigateTo($"/tests/{userId}/{testId}/cases");
     }
 
 }

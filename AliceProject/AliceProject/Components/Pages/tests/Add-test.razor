@@ -4,6 +4,7 @@
 @inject IModelService<Test> TestService
 @inject IBreadcrumbService BreadcrumbService
 @inject NavigationManager Navigation
+@inject ISnackbar Snackbar
 @attribute [Authorize()]
 
 <h3>Create New Test</h3>
@@ -26,16 +27,23 @@
     }
     private async Task InsertTest()
     {
+        if (testName == "")
+        {
+            Snackbar.Add("Name is required for Tests!", Severity.Error);
+            return;
+        }
         var test = new Test
         {
             Id = newGuid,
             Name = testName,
             Directory = userId +"/"+newGuid + "/",
-            UserId = Guid.Parse(userId)
+            UserId = Guid.Parse(userId),
+            CreatedAt = DateTime.Now
         };
         await TestService.Add(test);
         Navigation.NavigateTo($"/tests");
         StateHasChanged();
+        Snackbar.Add("Test Created!", Severity.Success);
     }
 
     private void Cancel()

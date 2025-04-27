@@ -72,7 +72,7 @@ namespace AliceProject.Services
             return new();
 
         }
-        public async Task CheckFileUsings(string path)
+        private async Task CheckFileUsings(string path)
         {
             List<string> filedata = await ReadFileContentRaw(path);
             bool changed = false;

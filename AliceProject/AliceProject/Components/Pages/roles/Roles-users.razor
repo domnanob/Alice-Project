@@ -3,6 +3,7 @@
 @inject NavigationManager Navigation
 @inject IModelService<Role> RoleService
 @inject IModelService<User> UserService
+@inject ISnackbar Snackbar
 @inject IBreadcrumbService BreadcrumbService
 @attribute [Authorize(Roles = "admin")]
 
@@ -28,7 +29,7 @@ else
                 <MudTd DataLabel="LastName">@context.LastName</MudTd>
                 <MudTd DataLabel="Email">@context.Email</MudTd>
                 <MudTd>
-                    <MudSelect T="Guid" Label="Roles" @onchange="()=>ChangeRole(context)" @bind-Value="context.RoleId">
+                    <MudSelect T="Guid" Label="Roles" @bind-Value="context.RoleId">
                         @foreach (var role in roles)
                         {
                             <MudSelectItem T="Guid" Value="@role.Id">@role.Name</MudSelectItem>
@@ -44,7 +45,7 @@ else
                                HorizontalAlignment="@horizontalAlignment" />
             </PagerContent>
         </MudTable>
-
+        <MudButton Variant="Variant.Outlined" Class="mt-3" OnClick="@(() => ChangeRoles())">Save All</MudButton>
 }
 
 @code {
@@ -68,15 +69,19 @@ else
         users = users.Where(x => x.RoleId == Guid.Parse(roleId)).ToList();
         roles = await RoleService.GetAll();
         roleName = roles.FirstOrDefault(x => x.Id == Guid.Parse(roleId)).Name;
-        await BreadcrumbService.SetItems([new(text: "Roles", href: "/roles", icon: Icons.Material.Filled.Storage), new("Users", $"/roles/users/{roleId}", icon: Icons.Material.Filled.EditNote)]);
+        await BreadcrumbService.SetItems([new(text: "Roles", href: "/roles", icon: Icons.Material.Filled.Storage), new(roleName, $"/roles/users/{roleId}", icon: Icons.Material.Filled.EditNote)]);
         await BreadcrumbService.RefreshLayout();
 
     }
-    private async void ChangeRole(User u)
+    private async void ChangeRoles()
     {
-        await UserService.Update(u);
+        foreach (var item in users)
+        {
+            await UserService.Update(item);
+        }
+        StateHasChanged();
         Navigation.Refresh(true);
-        //Nem refreshel!
+        Snackbar.Add("Roles Updated!", Severity.Success);
     }
     private string Capitalize(string str)
     {

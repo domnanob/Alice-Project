@@ -68,12 +68,13 @@ https://www.figma.com/board/KPiznHW78y3g7YjvfGqE2s/PROJECT-ALICE?node-id=2-90&t=
 
 This project utilizes the following NuGet packages:
 
-- `Microsoft.AspNetCore.Components.WebAssembly.Server`
-- `Microsoft.EntityFrameworkCore`
-- `Microsoft.EntityFrameworkCore.Design`
-- `Microsoft.EntityFrameworkCore.SqlServer`
-- `Microsoft.EntityFrameworkCore.Tools`
-
+- `Microsoft.AspNetCore.Components.WebAssembly.Server` v8.0.1
+- `Microsoft.EntityFrameworkCore` v9.0.2
+- `Microsoft.EntityFrameworkCore.Design` v9.0.2
+- `Microsoft.EntityFrameworkCore.SqlServer`v9.0.2
+- `Microsoft.EntityFrameworkCore.Tools` v9.0.2
+- `MudBlazor` v8.3.0
+- 
 ---
 
 ## 🤝 Contributing
